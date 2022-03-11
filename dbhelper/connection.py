@@ -11,9 +11,7 @@ def create_connection(dsn: str, password: str = None):
     scheme = o.scheme.lower()
     if password != None or password != "":
         o.password = password
-    # print(o.hostname, o.port, o.username, o.password,)
-    # print(type(o.port), type(o.port) == int)
-    # os._exit(0)
+
     if "mysql" == scheme:
         # print(o.password)
         cfg = dict(user=o.username,

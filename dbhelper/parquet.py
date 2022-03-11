@@ -1,15 +1,16 @@
 # import re
-from errno import EMFILE
 import os
+import shutil
 import time
 import typing as tp
+from errno import EMFILE
+from typing import Callable
 
 import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
-from typing import Callable
-from . import dataframe as dfh
 
+from . import dataframe as dfh
 
 # {NONE, SNAPPY, GZIP, BROTLI, LZ4, }.
 PARQUET_COMPRESSION_NONE = 'NONE'
@@ -20,15 +21,15 @@ PARQUET_COMPRESSION_LZ4 = 'LZ4'
 PARQUET_COMPRESSION_ZSTD = 'ZSTD'
 
 
-def create_parquet_file(engine, sql_query: str, file_name: os.PathLike, compression=PARQUET_COMPRESSION_SNAPPY, callback_print: Callable = None):
-    if callback_print is None:
-        def callback_print(*v, **k):
+def create_parquet(engine, sql_query: str, file_name: os.PathLike, compression=PARQUET_COMPRESSION_SNAPPY, func_print: Callable = None) -> int:
+    if func_print is None:
+        def func_print(*v, **k):
             pass
     try:
-        dir_temp = "./temp_" + str(time.time())
+        dir_temp = "./temp_" + str(time.time()).replace(".", "")
         temp_file = os.path.join(dir_temp, str(time.time()))
         os.makedirs(dir_temp, exist_ok=True)
-        callback_print("Start Query SqlStantement")
+        func_print("Start Query SqlStantement")
         iterator = pd.read_sql_query(
             sql_query,
             engine,
@@ -36,17 +37,17 @@ def create_parquet_file(engine, sql_query: str, file_name: os.PathLike, compress
             chunksize=10000,
             # dtype=pd.StringDtype(storage="pyarrow"),
         )
-        callback_print("End Query SqlStantement")
+        func_print("End Query SqlStantement")
 
         total_count = 0
         for i, df in enumerate(iterator):
-            callback_print("Convert To Parquet chunk: ", (i+1))
+            func_print("Convert To Parquet chunk: ", (i+1))
             if df is not None:
-                callback_print("Rows Count: ", len(df.index))
+                func_print("Rows Count: ", len(df.index))
 
             df = dfh.convert_dtypes(df)
 
-            callback_print("Pandas to parquet file.")
+            func_print("Pandas to parquet file.")
             table = pa.Table.from_pandas(df, preserve_index=False)
             # print(table)
             # for the first chunk of records
@@ -67,15 +68,16 @@ def create_parquet_file(engine, sql_query: str, file_name: os.PathLike, compress
 
         engine.close()
 
-        callback_print("Move file.")
+        func_print("Move file.")
         # ยายไฟล์จาก temfile
         os.rename(temp_file, file_name)
-        callback_print("End.")
+        func_print("End.")
     except Exception as ex:
         raise ex
     finally:
         if os.path.exists(dir_temp):
-            os.unlink(dir_temp)
+            shutil.rmtree(dir_temp, ignore_errors=True)
+    return total_count
 
 
 def read_parquet(filename: os.PathLike) -> pd.DataFrame:
