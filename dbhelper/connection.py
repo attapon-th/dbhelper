@@ -5,7 +5,7 @@ from sqlalchemy.engine import create_engine
 import os
 
 
-def create_connection_database(dsn: str, password: str = None):
+def create_connection(dsn: str, password: str = None):
     o = dsnparse.parse(dsn)
     # print(o)
     scheme = o.scheme.lower()
