@@ -6,6 +6,15 @@ from . import dataframe as dfh
 
 
 def create_table_ddl(vertica_cursor: Cursor, sql_create_table: str):
+    """Create Table with sql create table
+
+    Args:
+        vertica_cursor (Cursor): Cursor from vertica connection 
+        sql_create_table (str): SQL Create Table.
+
+    Raises:
+        Exception: Execute Create Table Error
+    """
     try:
         vertica_cursor.execute(sql_create_table)
     except Exception as er:
@@ -13,6 +22,16 @@ def create_table_ddl(vertica_cursor: Cursor, sql_create_table: str):
 
 
 def create_table_from(vertica_cursor: Cursor,  from_table: str, to_table: str,):
+    """Create Table from another table in vertica database
+
+    Args:
+        vertica_cursor (Cursor): Cursor from vertica connection 
+        from_table (str): Source table copy DDL.
+        to_table (str): Target table name
+
+    Raises:
+        Exception: Execute Create Table Error
+    """
     vsql = f'CREATE TABLE IF NOT EXISTS {to_table} LIKE {from_table}'
     try:
         vertica_cursor.execute(vsql)
@@ -21,6 +40,19 @@ def create_table_from(vertica_cursor: Cursor,  from_table: str, to_table: str,):
 
 
 def copy_to_vertica(vertica_cursor: Cursor, df: pd.DataFrame, table: str, *, reject_table: str = None, check_column: bool = True):
+    """_summary_
+
+    Args:
+        vertica_cursor (Cursor): Cursor from vertica connection .
+        df (pd.DataFrame): Pandas DataFrame.
+        table (str): Target table name.
+        reject_table (str, optional): Reject Data to table name. Defaults to None.
+        check_column (bool, optional): Check column if exists. Defaults to True.
+
+    Raises:
+        Exception: Target table copy is not exist.
+        Exception: Copy data error.
+    """
     if check_column:
         df_col = table_check(vertica_cursor, table)
         if df_col is None:
@@ -39,7 +71,17 @@ def copy_to_vertica(vertica_cursor: Cursor, df: pd.DataFrame, table: str, *, rej
         raise Exception("Copy Data Error: %s" % er.__str__())
 
 
-def build_sql_no_duplicate(table: str, column_check: str, order_by: str):
+def build_sql_no_duplicate(table: str, column_check: str, order_by: str) -> str:
+    """Build SQL For SELECT data no duplicate by `column_check` and select first row by `order_by`
+
+    Args:
+        table (str): full table name
+        column_check (str): columns check is not duplicate. Example: "c1,c2,c3"
+        order_by (str): order by for select row first
+
+    Returns:
+        str: SQL SELECT is no duplicate data
+    """
     return "SELECT no_dup.* FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY {column_check} ORDER BY {order_by}) as __rn FROM {table}) no_dup WHERE no_dup.__rn=1"
 
 
@@ -51,6 +93,23 @@ def merge_to_table(vertica_cursor: Cursor,
                    no_execute: bool = False,
                    add_field_insert: Dict[str, AnyStr] = None,
                    add_field_update: Dict[str, AnyStr] = None) -> Union[AnyStr, int]:
+    """Vertica Merge Data between table and table
+
+    Args:
+        vertica_cursor (Cursor): Cursor from vertica connection.
+        from_table (str): Source table name.
+        to_table (str): Target table name.
+        merge_on_columns (List[str]): Check columns match is `UPDATE` and not match is `INSERT`
+        no_execute (bool, optional): If `True` Return SQL Statement Only. Defaults to False.
+        add_field_insert (Dict[str, AnyStr], optional): Add field insret more. Defaults to None.
+        add_field_update (Dict[str, AnyStr], optional):  Add field update more. Defaults to None.
+
+    Raises:
+        Exception: Error Merge is not success.
+
+    Returns:
+        Union[AnyStr, int]: Return  `if no_execute == True` Return SQL Statement  `else` Return `merge_total` count total data merge into table target.
+    """
     # * check table if exists
     from_df = table_check(vertica_cursor, from_table)
     to_df = table_check(vertica_cursor, to_table)
@@ -127,6 +186,15 @@ def merge_to_table(vertica_cursor: Cursor,
 
 
 def table_check(vertica_cursor: Cursor, table: str) -> pd.DataFrame:
+    """_summary_
+
+    Args:
+        vertica_cursor (Cursor): Cursor from vertica connection.
+        table (str): Full Table name.
+
+    Returns:
+        pd.DataFrame: table if exsit return Padas DataFrame. 
+    """
     try:
         df = pd.read_sql_query(
             f"SELECT * FROM {table} LIMIT 0;", vertica_cursor.connection)
@@ -136,6 +204,15 @@ def table_check(vertica_cursor: Cursor, table: str) -> pd.DataFrame:
 
 
 def drop_table(vertica_cursor: Cursor, table: str) -> bool:
+    """Drop Table if exists.
+
+    Args:
+        vertica_cursor (Cursor): Cursor from vertica connection.
+        table (str): Full Table name.
+
+    Returns:
+        bool: is success.
+    """
     try:
         vertica_cursor.execute(f"DROP TABLE IF EXISTS {table};")
         return True

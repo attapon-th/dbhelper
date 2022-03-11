@@ -81,3 +81,5 @@ python -m sql_parquet \
 -p "password" 
 -o "test.parquet"
 ```
+
+### Parquet to Vertica
