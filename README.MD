@@ -58,7 +58,7 @@ Usage  `sql_parquet` Cli:
 
 Cli help:
 ```
-py -m sql_parquet dump --help
+python -m sql_parquet dump --help
 
 #--- OUTPUT ---#
 Usage: python -m sql_parquet dump [OPTIONS]
@@ -73,7 +73,7 @@ Options:
 
 Example:
 ```
-py -m sql_parquet \
+python -m sql_parquet \
 -s "SELET * FROM some_table Where id > 100;"
 -d "mysql://user@localhost:3306/test_db"
 -p "password" 
