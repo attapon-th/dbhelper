@@ -3,20 +3,22 @@
 
 ## TODO:  
 - [x] - Connection Database (Vertica, MySQL or SQLAlchemy Engine connect)
-- [x] - Dump SQL Query to **Parquet file**.
+- [x] - Dump SQL Query to **Parquet**.
 - [ ] - Dump SQL QUery to **CSV**
+- [x] - Restore to **Vertica** from **Parquet**
+- [ ] - Restore to **Vertica** from **CSV**
 
     
 
 ## Installation
 
-To install vertica-python with pip:
+To install `dbhelper` with pip:
 ```shell
 # Latest commit on main branch
 pip install git+https://github.com/attapon-th/dbhelper.git@main
 ```
 
-To install vertica-python from source, run the following command from the root directory:
+To install `dbhelper` from source, run the following command from the root directory:
 ```
 python setup.py install
 ```
