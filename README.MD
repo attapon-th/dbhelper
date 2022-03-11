@@ -59,6 +59,8 @@ Usage  `sql_parquet` Cli:
 Cli help:
 ```
 py -m sql_parquet dump --help
+
+#--- OUTPUT ---#
 Usage: python -m sql_parquet dump [OPTIONS]
 
 Options:
