@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import collections
-import py_compile
 from setuptools import setup, find_packages
 
 
@@ -12,7 +11,7 @@ opts = ReqOpts(None, 'git')
 # version should use the format 'x.x.x' (instead of 'vx.x.x')
 setup(
     name='dbhelper',
-    version='0.1.5',
+    version='0.2.4',
     description='',
     long_description="",
     long_description_content_type='text/markdown',
@@ -30,4 +29,5 @@ setup(
         'SQLAlchemy>=1.4.28',
         'pyarrow>=7.0.0',
         'mysql-connector-python>=8.0.27',
+        'wheel',
     ])

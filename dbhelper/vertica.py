@@ -1,11 +1,14 @@
-from typing import List
+from typing import Callable, List
 import pandas as pd
 from vertica_python.vertica.cursor import Cursor
+from vertica_python import errors, Connection
 from typing import List, Dict, AnyStr, Any, Union
 from . import dataframe as dfh
+import os
+import io
 
 
-def create_table_ddl(vertica_cursor: Cursor, sql_create_table: str):
+def create_table_ddl(vertica_connection: Connection, sql_create_table: str):
     """Create Table with sql create table
 
     Args:
@@ -16,12 +19,13 @@ def create_table_ddl(vertica_cursor: Cursor, sql_create_table: str):
         Exception: Execute Create Table Error
     """
     try:
-        vertica_cursor.execute(sql_create_table)
+        with vertica_connection.cursor() as cur:
+            cur.execute(sql_create_table)
     except Exception as er:
         raise Exception("Create Table Error: %s" % er.__str__())
 
 
-def create_table_from(vertica_cursor: Cursor,  from_table: str, to_table: str,):
+def create_table_from(vertica_connection: Connection,  from_table: str, to_table: str,):
     """Create Table from another table in vertica database
 
     Args:
@@ -32,43 +36,58 @@ def create_table_from(vertica_cursor: Cursor,  from_table: str, to_table: str,):
     Raises:
         Exception: Execute Create Table Error
     """
+    # if vertica_cursor.closed():
+    #     raise errors.InterfaceError('Cursor is closed')
     vsql = f'CREATE TABLE IF NOT EXISTS {to_table} LIKE {from_table}'
     try:
-        vertica_cursor.execute(vsql)
+        with vertica_connection.cursor() as vertica_cursor:
+            vertica_cursor.execute(vsql)
     except Exception as er:
         raise Exception("Create Table Error: %s" % er.__str__())
 
 
-def copy_to_vertica(vertica_cursor: Cursor, df: pd.DataFrame, table: str, *, reject_table: str = None, check_column: bool = True):
+def copy_to_vertica(
+        vertica_connection: Connection,
+        fs: Union[os.PathLike, io.BytesIO, io.StringIO, Any],
+        table: str, columns: List[str],
+        comprassion: str = "",
+        reject_table: str = None
+):
     """_summary_
 
     Args:
         vertica_cursor (Cursor): Cursor from vertica connection .
-        df (pd.DataFrame): Pandas DataFrame.
+        fs (Union[os.PathLike, io.BytesIO, io.StringIO]): file path or file open. Example: open("/tmp/file.csv", "rb")
         table (str): Target table name.
+        comprassion (str): Specifies the input format. [UNCOMPRESSED (default), BZIP,GZIP,LZO,ZSTD]
         reject_table (str, optional): Reject Data to table name. Defaults to None.
         check_column (bool, optional): Check column if exists. Defaults to True.
 
     Raises:
         Exception: Target table copy is not exist.
         Exception: Copy data error.
-    """
-    if check_column:
-        df_col = table_check(vertica_cursor, table)
-        if df_col is None:
-            raise Exception(f"Copy to Table[{table}] is not exists.")
-        df = dfh.select_column(df, df_col.columns.tolist())
 
-    cols = ",".join(df.columns.tolist())
-    vsql = f"COPY {table} ({cols}) FROM stdin PARSER public.fcsvparser()"
+    Returns:
+        str: SQL COPY
+    """
+    # if vertica_cursor.closed():
+    #     raise errors.InterfaceError('Cursor is closed')
+    if type(comprassion) == str:
+        comprassion = comprassion.upper()
+    else:
+        comprassion = ""
+    cols = ",".join(columns)
+    vsql = f"COPY {table} ({cols}) FROM stdin PARSER public.fcsvparser() {comprassion} "
 
     if not reject_table is None:
         vsql += f"REJECTED DATA AS TABLE {reject_table};"
     vsql += ";"
     try:
-        vertica_cursor.execute(vsql)
+        with vertica_connection.cursor() as vertica_cursor:
+            vertica_cursor.copy(vsql, fs, buffer_size=65536)
     except Exception as er:
         raise Exception("Copy Data Error: %s" % er.__str__())
+    return vsql
 
 
 def build_sql_no_duplicate(table: str, column_check: str, order_by: str) -> str:
@@ -85,7 +104,7 @@ def build_sql_no_duplicate(table: str, column_check: str, order_by: str) -> str:
     return "SELECT no_dup.* FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY {column_check} ORDER BY {order_by}) as __rn FROM {table}) no_dup WHERE no_dup.__rn=1"
 
 
-def merge_to_table(vertica_cursor: Cursor,
+def merge_to_table(vertica_connection: Connection,
                    from_table: str,
                    to_table: str,
                    merge_on_columns: List[str],
@@ -110,9 +129,11 @@ def merge_to_table(vertica_cursor: Cursor,
     Returns:
         Union[AnyStr, int]: Return  `if no_execute == True` Return SQL Statement  `else` Return `merge_total` count total data merge into table target.
     """
+    # if vertica_cursor.closed():
+    #     raise errors.InterfaceError('Cursor is closed')
     # * check table if exists
-    from_df = table_check(vertica_cursor, from_table)
-    to_df = table_check(vertica_cursor, to_table)
+    from_df = table_check(vertica_connection, from_table)
+    to_df = table_check(vertica_connection, to_table)
     if from_df is None:
         raise Exception(f"Table[{from_table}] is not exist.")
     if to_df is None:
@@ -122,8 +143,9 @@ def merge_to_table(vertica_cursor: Cursor,
     cols_from = from_df.columns.tolist()
     cols_to = to_df.columns.tolist()
     cols_from_merge_on_not_exists = [
-        a for a in cols_from if a in merge_on_columns]
-    cols_to_merge_on_not_exists = [a for a in cols_to if a in merge_on_columns]
+        a for a in merge_on_columns if not a in cols_from]
+    cols_to_merge_on_not_exists = [
+        a for a in merge_on_columns if not a in cols_to]
     if len(cols_from_merge_on_not_exists) > 0:
         raise Exception(
             f"Error columns[{cols_from_merge_on_not_exists}] not in `merge_on_columns`")
@@ -162,30 +184,32 @@ def merge_to_table(vertica_cursor: Cursor,
 
     vsql = f"""MERGE INTO {target_table} t USING {source_table} s ON {merge_on} """
     if len(cols_for_merge_onpk) > 0:
-        vsql = f"\nWHEN MATCHED THEN UPDATE SET {updates} "
-    vsql = "\nWHEN NOT MATCHED THEN INSERT ({columns}) VALUES ({inserts}) "
-    vsql = ";"
+        vsql += f"\nWHEN MATCHED THEN UPDATE SET {updates} "
+    vsql += f"\nWHEN NOT MATCHED THEN INSERT ({columns}) VALUES ({inserts}) "
+    vsql += ";"
     if no_execute:
         return vsql
     try:
         merge_count = 0
-        vertica_cursor.execute(vsql)
-        if vertica_cursor:
-            a = vertica_cursor.fetchone()
-            if isinstance(a, dict):
-                if "OUTPUT" in a:
-                    merge_count = a["OUTPUT"]
-            elif len(a) > 0:
-                merge_count = a[0]
-            else:
-                merge_count = -1
+        # print(vsql)
+        with vertica_connection.cursor() as vertica_cursor:
+            vertica_cursor.execute(vsql)
+            if not vertica_cursor is None:
+                a = vertica_cursor.fetchone()
+                if isinstance(a, dict):
+                    if "OUTPUT" in a:
+                        merge_count = a["OUTPUT"]
+                elif isinstance(a, list) and len(a) > 0:
+                    merge_count = a[0]
+                else:
+                    merge_count = -1
         return merge_count
     except Exception as ex:
         raise Exception(
-            f"Error merge data from[{from_table}] to[{to_table}]. {ex}")
+            f"Error merge data from[{from_table}] to [{to_table}]. {ex}")
 
 
-def table_check(vertica_cursor: Cursor, table: str) -> pd.DataFrame:
+def table_check(vertica_connection: Connection, table: str) -> pd.DataFrame:
     """_summary_
 
     Args:
@@ -197,13 +221,13 @@ def table_check(vertica_cursor: Cursor, table: str) -> pd.DataFrame:
     """
     try:
         df = pd.read_sql_query(
-            f"SELECT * FROM {table} LIMIT 0;", vertica_cursor.connection)
+            f"SELECT * FROM {table} LIMIT 0;", vertica_connection)
         return df
     except:
         return None
 
 
-def drop_table(vertica_cursor: Cursor, table: str) -> bool:
+def drop_table(vertica_connection: Connection, table: str) -> bool:
     """Drop Table if exists.
 
     Args:
@@ -214,7 +238,8 @@ def drop_table(vertica_cursor: Cursor, table: str) -> bool:
         bool: is success.
     """
     try:
-        vertica_cursor.execute(f"DROP TABLE IF EXISTS {table};")
-        return True
+        with vertica_connection.cursor() as vertica_cursor:
+            vertica_cursor.execute(f"DROP TABLE IF EXISTS {table};")
+        return not vertica_cursor is None
     except:
         return False

@@ -21,7 +21,7 @@ PARQUET_COMPRESSION_LZ4 = 'LZ4'
 PARQUET_COMPRESSION_ZSTD = 'ZSTD'
 
 
-def create_parquet(engine, sql_query: str, file_name: os.PathLike, compression=PARQUET_COMPRESSION_SNAPPY, func_print: Callable = None) -> int:
+def to_parquet(engine, sql_query: str, file_name: os.PathLike, compression=PARQUET_COMPRESSION_SNAPPY, func_print: Callable = None) -> int:
     if func_print is None:
         def func_print(*v, **k):
             pass

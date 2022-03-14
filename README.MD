@@ -4,7 +4,7 @@
 ## TODO:  
 - [x] - Connection Database (Vertica, MySQL or SQLAlchemy Engine connect)
 - [x] - Dump SQL Query to **Parquet**.
-- [ ] - Dump SQL QUery to **CSV**
+- [ ] - Dump SQL QUery to **CSV**  ** Only GZip or plain text
 - [x] - Restore to **Vertica** from **Parquet**
 - [ ] - Restore to **Vertica** from **CSV**
 
