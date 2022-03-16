@@ -20,7 +20,7 @@ setup(
     url='https://github.com/attapon/DbHelper',
     keywords="database vertica mysql parquet csv",
     packages=find_packages(),
-    py_modules=["sql_parquet"],
+    py_modules=["sql_parquet", "sql_csv"],
     install_requires=[
         'dsnparse>=0.1.15',
         'pandas>=1.3.4',

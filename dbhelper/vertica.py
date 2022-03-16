@@ -8,19 +8,28 @@ import os
 import io
 
 
-def create_table_ddl(vertica_connection: Connection, sql_create_table: str):
-    """Create Table with sql create table
+def create_table_with_query(vertica_connection: Connection, query: str, to_table: str, is_temp_table: bool = False):
+    """Create Table in Vertica with SQL Query
 
     Args:
-        vertica_cursor (Cursor): Cursor from vertica connection 
-        sql_create_table (str): SQL Create Table.
+        vertica_connection (Connection): Vertica Connection
+        query (str): SQL Query (SELECT Only)
+        to_table (str): Table name ([schema.tablename|tablename])
+        is_temp_table (bool, optional): create temp table delete auto when Vertica Session Connect closed. Defaults to False.
 
     Raises:
-        Exception: Execute Create Table Error
+        Exception: Create Table Error
     """
+    if is_temp_table == True:
+        vsql = f'CREATE TEMP TABLE IF NOT  EXISTS {to_table} ON COMMIT PRESERVE ROWS AS {query}'
+    else:
+        vsql = f'CREATE TABLE IF NOT EXISTS {to_table} AS {query}'
+    if not "limit" in query.lower():
+        vsql += " LIMIT 0"
+    vsql += ";"
     try:
-        with vertica_connection.cursor() as cur:
-            cur.execute(sql_create_table)
+        with vertica_connection.cursor() as vertica_cursor:
+            vertica_cursor.execute(vsql)
     except Exception as er:
         raise Exception("Create Table Error: %s" % er.__str__())
 
@@ -29,7 +38,7 @@ def create_table_from(vertica_connection: Connection,  from_table: str, to_table
     """Create Table from another table in vertica database
 
     Args:
-        vertica_cursor (Cursor): Cursor from vertica connection 
+        vertica_connection (Connection): Vertica Connection
         from_table (str): Source table copy DDL.
         to_table (str): Target table name
 
@@ -56,7 +65,7 @@ def copy_to_vertica(
     """_summary_
 
     Args:
-        vertica_cursor (Cursor): Cursor from vertica connection .
+        vertica_connection (Connection): Vertica Connection .
         fs (Union[os.PathLike, io.BytesIO, io.StringIO]): file path or file open. Example: open("/tmp/file.csv", "rb")
         table (str): Target table name.
         comprassion (str): Specifies the input format. [UNCOMPRESSED (default), BZIP,GZIP,LZO,ZSTD]
@@ -77,7 +86,7 @@ def copy_to_vertica(
     else:
         comprassion = ""
     cols = ",".join(columns)
-    vsql = f"COPY {table} ({cols}) FROM stdin PARSER public.fcsvparser() {comprassion} "
+    vsql = f"COPY {table} ({cols}) FROM stdin {comprassion} PARSER public.fcsvparser() "
 
     if not reject_table is None:
         vsql += f"REJECTED DATA AS TABLE {reject_table};"
@@ -115,7 +124,7 @@ def merge_to_table(vertica_connection: Connection,
     """Vertica Merge Data between table and table
 
     Args:
-        vertica_cursor (Cursor): Cursor from vertica connection.
+        vertica_connection (Connection): Vertica Connection.
         from_table (str): Source table name.
         to_table (str): Target table name.
         merge_on_columns (List[str]): Check columns match is `UPDATE` and not match is `INSERT`
@@ -213,7 +222,7 @@ def table_check(vertica_connection: Connection, table: str) -> pd.DataFrame:
     """_summary_
 
     Args:
-        vertica_cursor (Cursor): Cursor from vertica connection.
+        vertica_connection (Connection): Vertica Connection.
         table (str): Full Table name.
 
     Returns:
@@ -231,7 +240,7 @@ def drop_table(vertica_connection: Connection, table: str) -> bool:
     """Drop Table if exists.
 
     Args:
-        vertica_cursor (Cursor): Cursor from vertica connection.
+        vertica_connection (Connection): Vertica Connection.
         table (str): Full Table name.
 
     Returns:
