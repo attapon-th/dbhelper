@@ -6,6 +6,7 @@ from dbhelper import connection as cc
 from dbhelper import vertica as vc
 from dbhelper import csv as cv
 from dbhelper import dataframe as dh
+import pandas as pd
 
 import click
 import os
@@ -35,8 +36,12 @@ def dump(output, dsn, sql="", password=None, compression="gzip"):
             sql_str = f.read()
     else:
         sql_str = sql
-
-    total = cv.to_csv(conn, sql_str, output, func_print=print)
+    sql_str = sql_str.strip().rstrip(";")
+    sql_count = f"SELECT count(1) c FROM ({sql_str}) q"
+    df = pd.read_sql_query(sql_count, conn)
+    if df:
+        print("SQL Count data from SQL: ", df["c"][0])
+    total = cv.to_csv(conn, sql_str, output, compression, func_print=print)
     print("total count: ", total)
 
 
