@@ -39,7 +39,7 @@ def dump(output, dsn, sql="", password=None, compression="gzip"):
     sql_str = sql_str.strip().rstrip(";")
     sql_count = f"SELECT count(1) c FROM ({sql_str}) q"
     df = pd.read_sql_query(sql_count, conn)
-    if df:
+    if not df is None:
         print("SQL Count data from SQL: ", df["c"][0])
     total = cv.to_csv(conn, sql_str, output, compression, func_print=print)
     print("total count: ", total)
