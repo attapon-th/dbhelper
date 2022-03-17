@@ -56,30 +56,73 @@ print("record dump total: ", total_count)
 ```
 
 
-Usage  `sql_parquet` Cli:
+## Usage Cli
 
-Cli help:
+- `sql_parquet`  
+- `sql_csv`
 ```
-python -m sql_parquet dump --help
+python -m sql_parquet --help
 
 #--- OUTPUT ---#
-Usage: python -m sql_parquet dump [OPTIONS]
+Usage: python -m sql_parquet [OPTIONS] COMMAND [ARGS]...
+
+  Dump SQL Statement to Parquet file.
 
 Options:
-  -o, --output TEXT    Dump file output name  [required]
-  -d, --dsn TEXT       Database connection string  [required]
-  -s, --sql TEXT       SQL Query Statement[file|str]  [required]
-  -p, --password TEXT  Password database
-  --help               Show this message and exit.
+  --help  Show this message and exit.
+
+Commands:
+  dump
+  vmerge
 ```
 
-Example:
+### Example `sql_parquet`
+
+Dump `SQL Query` to `Parquet` file.
 ```
 python -m sql_parquet \
+dump \
 -s "SELET * FROM some_table Where id > 100;"
 -d "mysql://user@localhost:3306/test_db"
 -p "password" 
 -o "test.parquet"
 ```
 
-### Parquet to Vertica
+
+Restore `Parquet` file to `Vertica`.
+```
+python -m sql_parquet \
+vmerge \
+-d "vertica://user@localhost:3306/test_db"
+-p "password" 
+-f "test.parquet"
+-m "primary_key1, primary_key2"
+-t "schema_name.table_name"
+```
+
+### Example `sql_csv`
+
+
+Dump `SQL Query` to `csv` file.
+
+> Default compression: `gzip`
+```
+python -m sql_csv \
+dump \
+-s "SELET * FROM some_table Where id > 100;"
+-d "mysql://user@localhost:3306/test_db"
+-p "password" 
+-o "test.csv.gz"
+```
+
+
+Restore `CSV` file to `Vertica`.
+```
+python -m sql_csv \
+vmerge \
+-d "vertica://user@localhost:3306/test_db"
+-p "password" 
+-f "test.csv.gz"
+-m "primary_key1, primary_key2"
+-t "schema_name.table_name"
+```
