@@ -29,6 +29,10 @@ def main():
 @click.option('--password', '-p',  type=str, help="Password database")
 @click.option('--compression',  type=str, default="gzip", help="Compression CSV")
 def dump(output, dsn, sql="", password=None, compression="gzip"):
+    return dump_from_sql(output, dsn, sql, password, compression)
+
+
+def dump_from_sql(output: str, dsn: str, sql: str = "", password: str = None, compression: str = "gzip"):
     conn = cc.create_connection(dsn, password)
 
     if os.path.exists(sql):
@@ -53,7 +57,11 @@ def dump(output, dsn, sql="", password=None, compression="gzip"):
 @click.option('--reject',  type=str, help="reject table")
 @click.option('--password', '-p',  type=str, help="Password database")
 @click.option('--compression',  type=str, default="gzip", help="Compression CSV")
-def vmerge(file, dsn, table, merge_on, reject, password=None, compression="gzip"):
+def vmerge(file, dsn, table, merge_on, password=None, compression="gzip", reject=""):
+    return merge_to_vertica(file, dsn, table, merge_on, password, compression, reject)
+
+
+def merge_to_vertica(file: os.PathLike, dsn: str, table: str, merge_on: str, reject: str = "", password: str = None, compression: str = "gzip"):
     conn = cc.create_connection(dsn, password)
 
     if not os.path.exists(file):
