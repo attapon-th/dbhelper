@@ -120,7 +120,7 @@ Restore `CSV` file to `Vertica`.
 ```
 python -m sql_csv \
 vmerge \
--d "vertica://user@localhost:3306/test_db"
+-d "vertica://user@localhost:5433/test_db"
 -p "password" 
 -f "test.csv.gz"
 -m "primary_key1, primary_key2"
