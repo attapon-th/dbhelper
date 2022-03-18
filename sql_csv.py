@@ -92,12 +92,12 @@ def vmerge(file, dsn, table, merge_on, reject, password=None, compression="gzip"
             print("copy to vertica")
             vc.copy_to_vertica(conn, fs, table_temp, columns, compression, reject_table=reject)
             print("copy to vertica: ", "[PASS]")
-        print("Start Merge to main table.")
+        print("Start Merge to ", table)
         total = vc.merge_to_table(conn, table_temp, table, col_on)
         print("Merge data count: ", total)
 
-        # print(f"drop temp table[{table_temp}")
-        # vc.drop_table(conn, table_temp)
+        print(f"drop temp table[{table_temp}")
+        vc.drop_table(conn, table_temp)
 
     except Exception as ex:
         print(ex)

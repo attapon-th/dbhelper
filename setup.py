@@ -11,7 +11,7 @@ opts = ReqOpts(None, 'git')
 # version should use the format 'x.x.x' (instead of 'vx.x.x')
 setup(
     name='dbhelper',
-    version='0.3.1',
+    version='0.3.2',
     description='',
     long_description="",
     long_description_content_type='text/markdown',
