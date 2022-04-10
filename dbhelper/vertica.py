@@ -1,6 +1,5 @@
 from random import random
 from typing import Callable, List
-import cursor
 import pandas as pd
 from vertica_python.vertica.cursor import Cursor
 from vertica_python import errors, Connection
