@@ -1,4 +1,6 @@
+from random import random
 from typing import Callable, List
+import cursor
 import pandas as pd
 from vertica_python.vertica.cursor import Cursor
 from vertica_python import errors, Connection
@@ -6,6 +8,9 @@ from typing import List, Dict, AnyStr, Any, Union
 from . import dataframe as dfh
 import os
 import io
+import random
+
+random.seed(10)
 
 
 def create_table_with_query(vertica_connection: Connection, query: str, to_table: str, is_temp_table: bool = False):
@@ -53,6 +58,53 @@ def create_table_from(vertica_connection: Connection,  from_table: str, to_table
             vertica_cursor.execute(vsql)
     except Exception as er:
         raise Exception("Create Table Error: %s" % er.__str__())
+
+
+def create_table_local_temp(vertica_connection: Connection,  query: str, to_tablename: str):
+    """Create local temp table in vertica
+
+    Args:
+        vertica_connection (Connection): Vertica Connection
+        query (str): SQL Statement (SELECT Only).
+        to_tablename (str): Target table name only (No Schema name)
+
+    Raises:
+        Exception:  Execute Create Table Error
+    """
+    vsql = f'CREATE LOCAL TEMP TABLE IF NOT EXISTS {to_tablename} ON COMMIT PRESERVE ROWS AS '
+    if not "limit" in query.lower():
+        vsql += f"\nSELECT * FROM ({query}) a LIMIT 0;"
+    try:
+        with vertica_connection.cursor() as vertica_cursor:
+            vertica_cursor.execute(vsql)
+    except Exception as er:
+        raise Exception("Create Table Error: %s" % er.__str__())
+
+
+def get_ddl(vertica_connection: Connection,  query: str, to_table: str) -> str:
+    """Get SQL Create Table Statement With Query
+
+    Args:
+        vertica_connection (Connection): Vertica Connection
+        query (str): query (str): SQL Statement (SELECT Only).
+        to_table (str):  Target table name (Full call: 'schema.table' )
+
+    Returns:
+        str: SQL Create table
+    """
+    table = to_table
+    rnd = int(random.random()*100000)
+    to_table = f"{to_table}_{rnd}".replace(".", "_")
+    create_table_local_temp(vertica_connection, query, to_table)
+    with vertica_connection.cursor() as cur:
+        cur.execute(f"SELECT export_objects('', '{to_table}', FALSE);")
+        dll = cur.fetchone().pop()
+        cur.execute(f"DROP TABLE IF EXISTS {to_table}")
+        dll = dll.split("\n\n").pop(1)
+        dll = dll.split("(", 1).pop()
+        dll = dll.rsplit(")", 1).pop(0)
+    ddl = f"CREATE TABLE IF NOT EXISTS {table}({dll});"
+    return ddl
 
 
 def copy_to_vertica(
