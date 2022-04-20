@@ -1,6 +1,7 @@
 # Database Helper (Dump, Backup, Restore)
 
 [![GitHub version](https://badge.fury.io/gh/attapon-th%2Fdbhelper.svg)](https://badge.fury.io/gh/attapon-th%2Fdbhelper)
+[![GitHub release version](https://img.shields.io/github/v/release/attapon-th/dbhelper?include_prereleases)](https://github.com/attapon-th/dbhelper)
 
 
 
