@@ -1,5 +1,8 @@
 # Database Helper (Dump, Backup, Restore)
 
+[![GitHub version](https://badge.fury.io/gh/attapon-th%2Fdbhelper.svg)](https://badge.fury.io/gh/attapon-th%2Fdbhelper)
+
+
 
 ## API Documentation
 
