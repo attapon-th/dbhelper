@@ -6,6 +6,21 @@ import os
 
 
 def create_connection(dsn: str, password: str = None):
+    """Create Database Connection  
+
+       MySQL: `mysql://{user}@{host}:{port}/{db_name}`  
+
+       Vertica: `vertica://{user}@{host}:{port}/{db_name}`  
+
+       OtherDB: `{dialect}+{driver}://{user}@{host}:{port}/{db_name}`
+
+    Args:
+        dsn (str): dsn string connection Example: `mysql://root@127.0.0.1:3306/mydb`
+        password (str, optional): Password Database. Defaults to None.
+
+    Returns:
+        DBConnection: Connection Database if success.
+    """
     o = dsnparse.parse(dsn)
     # print(o)
     scheme = o.scheme.lower()
@@ -30,12 +45,12 @@ def create_connection(dsn: str, password: str = None):
         cnx = mysql.connector.connect(**cfg)
         return cnx
     elif "vertica" == scheme:
-        return conn_vertica(dsn, password=password)
+        return __conn_vertica(dsn, password=password)
     else:
         return create_engine(o.geturl())
 
 
-def conn_vertica(dsn: str, password: str):
+def __conn_vertica(dsn: str, password: str):
     print("Connect DSN: ", dsn)
     conn_info = vertica_python.parse_dsn(dsn)
     if password:

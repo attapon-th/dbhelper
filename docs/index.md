@@ -7,9 +7,8 @@
 - [x] - Dump SQL QUery to **CSV**  ** Only GZip or plain text
 - [x] - Restore to **Vertica** from **Parquet**
 - [x] - Restore to **Vertica** from **CSV**
-
+- [ ] - ETC...
     
-
 ## Installation
 
 To install `dbhelper` with pip:

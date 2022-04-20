@@ -15,7 +15,22 @@ CSV_COMPRESSION_GZIP = "gzip"
 CSV_COMPRESSION_ZIP = "zip"
 
 
-def to_csv(engine, sql_query: str, file_name: os.PathLike, compression=CSV_COMPRESSION_GZIP,  func_print: Callable = None) -> int:
+def to_csv(engine, sql_query: str, file_name: os.PathLike, compression=CSV_COMPRESSION_GZIP,  func_print: Callable = print) -> int:
+    """SQL Query Statemet to CSV format file and compression data.
+
+    Args:
+        engine (Connection): Connection Database And SQLAlchemy.Engine
+        sql_query (str): SQL Query Statement (SELECT Only)
+        file_name (os.PathLike): save with filename and extention file (Example: `./mycsv.csv.gz`)
+        compression (str, optional): Compression file type (`plain|gzip|zip`). Defaults to CSV_COMPRESSION_GZIP.
+        func_print (Callable, optional): Callback Print Massage function . Defaults to print.
+
+    Raises:
+        ex: Errror Handler
+
+    Returns:
+        int: Total count record data. 
+    """
     if func_print is None:
         def func_print(*v, **k):
             pass
@@ -70,6 +85,20 @@ def to_csv(engine, sql_query: str, file_name: os.PathLike, compression=CSV_COMPR
 
 
 def read_csv(filename: os.PathLike, **pandas_option) -> pd.DataFrame:
+    """Read Csv file 
+
+    pandas option: [https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
+
+    Args:
+        filename (os.PathLike): Any valid string path is acceptable. The string could be a URL. Valid URL schemes include http, ftp, s3, gs, and file. For file URLs, a host is expected. A local file could be: file://localhost/path/to/table.csv.
+
+If you want to pass in a path object, pandas accepts any os.PathLike.
+
+By file-like object, we refer to objects with a read() method, such as a file handle (e.g. via builtin open function) or StringIO.
+
+    Returns:
+        pd.DataFrame: pandas DataFrame
+    """
     pandas_option = __default_pandas_option(**pandas_option)
     df = pd.read_csv(filename, **pandas_option)
     df = dh.convert_dtypes(df)
@@ -77,6 +106,15 @@ def read_csv(filename: os.PathLike, **pandas_option) -> pd.DataFrame:
 
 
 def head_csv(filename: os.PathLike, nrows: int = 10, **pandas_option) -> pd.DataFrame:
+    """Read Head record in csv file
+
+    Args:
+        filename (os.PathLike): filename
+        nrows (int, optional): number rows. Defaults to 10.
+
+    Returns:
+        pd.DataFrame: pandas DataFrame
+    """
     pandas_option = __default_pandas_option(**pandas_option)
 
     df = pd.read_csv(filename, nrows=nrows, **pandas_option)
@@ -85,6 +123,15 @@ def head_csv(filename: os.PathLike, nrows: int = 10, **pandas_option) -> pd.Data
 
 
 def batch_csv(filename: os.PathLike, batch_size: int = 10000,  **pandas_option) -> Iterator[pd.DataFrame]:
+    """Read CSV file for iteration object
+
+    Args:
+        filename (os.PathLike): filename
+        batch_size (int, optional): batch_size or chunksize row number. Defaults to 10000.
+
+    Yields:
+        Iterator[pd.DataFrame]: Return  Iterator[pd.DataFrame]
+    """
     pandas_option = __default_pandas_option(**pandas_option)
 
     df = pd.read_csv(filename, chunksize=batch_size, **pandas_option)

@@ -2,7 +2,7 @@ from random import random
 from typing import Callable, List
 import pandas as pd
 from vertica_python.vertica.cursor import Cursor
-from vertica_python import errors, Connection
+from vertica_python import errors, Connection as VerticaConnection
 from typing import List, Dict, AnyStr, Any, Union
 from . import dataframe as dfh
 import os
@@ -12,11 +12,11 @@ import random
 random.seed(10)
 
 
-def create_table_with_query(vertica_connection: Connection, query: str, to_table: str, is_temp_table: bool = False):
+def create_table_with_query(vertica_connection: VerticaConnection, query: str, to_table: str, is_temp: bool = False) -> str:
     """Create Table in Vertica with SQL Query
 
     Args:
-        vertica_connection (Connection): Vertica Connection
+        vertica_connection (VerticaConnection): Vertica Connection
         query (str): SQL Query (SELECT Only)
         to_table (str): Table name ([schema.tablename|tablename])
         is_temp_table (bool, optional): create temp table delete auto when Vertica Session Connect closed. Defaults to False.
@@ -24,7 +24,7 @@ def create_table_with_query(vertica_connection: Connection, query: str, to_table
     Raises:
         Exception: Create Table Error
     """
-    if is_temp_table == True:
+    if is_temp == True:
         vsql = f'CREATE TEMP TABLE IF NOT  EXISTS {to_table} ON COMMIT PRESERVE ROWS AS {query}'
     else:
         vsql = f'CREATE TABLE IF NOT EXISTS {to_table} AS {query}'
@@ -38,11 +38,11 @@ def create_table_with_query(vertica_connection: Connection, query: str, to_table
         raise Exception("Create Table Error: %s" % er.__str__())
 
 
-def create_table_from(vertica_connection: Connection,  from_table: str, to_table: str,):
+def create_table_from(vertica_connection: VerticaConnection,  from_table: str, to_table: str,):
     """Create Table from another table in vertica database
 
     Args:
-        vertica_connection (Connection): Vertica Connection
+        vertica_connection (VerticaConnection): Vertica Connection
         from_table (str): Source table copy DDL.
         to_table (str): Target table name
 
@@ -59,11 +59,11 @@ def create_table_from(vertica_connection: Connection,  from_table: str, to_table
         raise Exception("Create Table Error: %s" % er.__str__())
 
 
-def create_table_local_temp(vertica_connection: Connection,  query: str, to_tablename: str):
+def create_table_local_temp(vertica_connection: VerticaConnection,  query: str, to_tablename: str):
     """Create local temp table in vertica
 
     Args:
-        vertica_connection (Connection): Vertica Connection
+        vertica_connection (VerticaConnection): Vertica Connection
         query (str): SQL Statement (SELECT Only).
         to_tablename (str): Target table name only (No Schema name)
 
@@ -80,11 +80,11 @@ def create_table_local_temp(vertica_connection: Connection,  query: str, to_tabl
         raise Exception("Create Table Error: %s" % er.__str__())
 
 
-def get_ddl(vertica_connection: Connection,  query: str, to_table: str) -> str:
+def get_ddl(vertica_connection: VerticaConnection,  query: str, to_table: str) -> str:
     """Get SQL Create Table Statement With Query
 
     Args:
-        vertica_connection (Connection): Vertica Connection
+        vertica_connection (VerticaConnection): Vertica Connection
         query (str): query (str): SQL Statement (SELECT Only).
         to_table (str):  Target table name (Full call: 'schema.table' )
 
@@ -99,7 +99,7 @@ def get_ddl(vertica_connection: Connection,  query: str, to_table: str) -> str:
         cur.execute(f"SELECT export_objects('', '{to_table}', FALSE);")
         dll = cur.fetchone().pop()
         cur.execute(f"DROP TABLE IF EXISTS {to_table}")
-        dll = dll.split("\n\n").pop(1)
+        dll = dll.split(";").pop(1)
         dll = dll.split("(", 1).pop()
         dll = dll.rsplit(")", 1).pop(0)
     ddl = f"CREATE TABLE IF NOT EXISTS {table}({dll});"
@@ -107,16 +107,17 @@ def get_ddl(vertica_connection: Connection,  query: str, to_table: str) -> str:
 
 
 def copy_to_vertica(
-        vertica_connection: Connection,
+        vertica_connection: VerticaConnection,
         fs: Union[os.PathLike, io.BytesIO, io.StringIO, Any],
-        table: str, columns: List[str],
+        table: str,
+        columns: List[str],
         comprassion: str = "",
         reject_table: str = None
 ):
     """_summary_
 
     Args:
-        vertica_connection (Connection): Vertica Connection .
+        vertica_connection (VerticaConnection): Vertica Connection .
         fs (Union[os.PathLike, io.BytesIO, io.StringIO]): file path or file open. Example: open("/tmp/file.csv", "rb")
         table (str): Target table name.
         comprassion (str): Specifies the input format. [UNCOMPRESSED (default), BZIP,GZIP,LZO,ZSTD]
@@ -150,21 +151,7 @@ def copy_to_vertica(
     return vsql
 
 
-def build_sql_no_duplicate(table: str, column_check: str, order_by: str) -> str:
-    """Build SQL For SELECT data no duplicate by `column_check` and select first row by `order_by`
-
-    Args:
-        table (str): full table name
-        column_check (str): columns check is not duplicate. Example: "c1,c2,c3"
-        order_by (str): order by for select row first
-
-    Returns:
-        str: SQL SELECT is no duplicate data
-    """
-    return "SELECT no_dup.* FROM (SELECT *, ROW_NUMBER() OVER(PARTITION BY {column_check} ORDER BY {order_by}) as __rn FROM {table}) no_dup WHERE no_dup.__rn=1"
-
-
-def merge_to_table(vertica_connection: Connection,
+def merge_to_table(vertica_connection: VerticaConnection,
                    from_table: str,
                    to_table: str,
                    merge_on_columns: List[str],
@@ -175,7 +162,7 @@ def merge_to_table(vertica_connection: Connection,
     """Vertica Merge Data between table and table
 
     Args:
-        vertica_connection (Connection): Vertica Connection.
+        vertica_connection (VerticaConnection): Vertica Connection.
         from_table (str): Source table name.
         to_table (str): Target table name.
         merge_on_columns (List[str]): Check columns match is `UPDATE` and not match is `INSERT`
@@ -269,11 +256,11 @@ def merge_to_table(vertica_connection: Connection,
             f"Error merge data from[{from_table}] to [{to_table}]. {ex}")
 
 
-def table_check(vertica_connection: Connection, table: str) -> pd.DataFrame:
+def table_check(vertica_connection: VerticaConnection, table: str) -> pd.DataFrame:
     """_summary_
 
     Args:
-        vertica_connection (Connection): Vertica Connection.
+        vertica_connection (VerticaConnection): Vertica Connection.
         table (str): Full Table name.
 
     Returns:
@@ -287,11 +274,11 @@ def table_check(vertica_connection: Connection, table: str) -> pd.DataFrame:
         return None
 
 
-def drop_table(vertica_connection: Connection, table: str) -> bool:
+def drop_table(vertica_connection: VerticaConnection, table: str) -> bool:
     """Drop Table if exists.
 
     Args:
-        vertica_connection (Connection): Vertica Connection.
+        vertica_connection (VerticaConnection): Vertica Connection.
         table (str): Full Table name.
 
     Returns:
