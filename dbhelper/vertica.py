@@ -257,7 +257,7 @@ def merge_to_table(vertica_connection: VerticaConnection,
 
 
 def table_check(vertica_connection: VerticaConnection, table: str) -> pd.DataFrame:
-    """_summary_
+    """Check table if exists
 
     Args:
         vertica_connection (VerticaConnection): Vertica Connection.

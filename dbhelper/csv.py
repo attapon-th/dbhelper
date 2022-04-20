@@ -90,11 +90,7 @@ def read_csv(filename: os.PathLike, **pandas_option) -> pd.DataFrame:
     pandas option: [https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html](https://pandas.pydata.org/docs/reference/api/pandas.read_csv.html)
 
     Args:
-        filename (os.PathLike): Any valid string path is acceptable. The string could be a URL. Valid URL schemes include http, ftp, s3, gs, and file. For file URLs, a host is expected. A local file could be: file://localhost/path/to/table.csv.
-
-If you want to pass in a path object, pandas accepts any os.PathLike.
-
-By file-like object, we refer to objects with a read() method, such as a file handle (e.g. via builtin open function) or StringIO.
+        filename (os.PathLike): file name `os.PathLike`
 
     Returns:
         pd.DataFrame: pandas DataFrame

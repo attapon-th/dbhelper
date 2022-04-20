@@ -1,24 +1,33 @@
 # Database Helper (Dump, Backup, Restore)
-> 
+
+
+## Link
+
+### [DB Helper API Documentation](https://attapon-th.github.io/dbhelper/dbhelper)  
+
+
 
 ## TODO:  
+
 - [x] - Connection Database (Vertica, MySQL or SQLAlchemy Engine connect)
 - [x] - Dump SQL Query to **Parquet**.
 - [x] - Dump SQL QUery to **CSV**  ** Only GZip or plain text
 - [x] - Restore to **Vertica** from **Parquet**
 - [x] - Restore to **Vertica** from **CSV**
+- [ ] - ETC...
 
-    
 
 ## Installation
 
 To install `dbhelper` with pip:
+
 ```shell
 # Latest commit on main branch
 pip install git+https://github.com/attapon-th/dbhelper.git@main
 ```
 
 To install `dbhelper` from source, run the following command from the root directory:
+
 ```
 python setup.py install
 ```
@@ -46,6 +55,7 @@ conn = dh_conn.create_connection(dsn, password)
 ```
 
 ### Dump Parquet file by SQL Query
+
 ```python
 from dbhelper import parquet as pq
 
@@ -60,7 +70,8 @@ print("record dump total: ", total_count)
 
 - `sql_parquet`  
 - `sql_csv`
-```
+
+```shell
 python -m sql_parquet --help
 
 #--- OUTPUT ---#
@@ -79,7 +90,8 @@ Commands:
 ### Example `sql_parquet`
 
 Dump `SQL Query` to `Parquet` file.
-```
+
+```shell
 python -m sql_parquet \
 dump \
 -s "SELET * FROM some_table Where id > 100;"
@@ -90,7 +102,8 @@ dump \
 
 
 Restore `Parquet` file to `Vertica`.
-```
+
+```shell
 python -m sql_parquet \
 vmerge \
 -d "vertica://user@localhost:3306/test_db"
@@ -106,7 +119,8 @@ vmerge \
 Dump `SQL Query` to `csv` file.
 
 > Default compression: `gzip`
-```
+
+```shell
 python -m sql_csv \
 dump \
 -s "SELET * FROM some_table Where id > 100;"
@@ -117,7 +131,8 @@ dump \
 
 
 Restore `CSV` file to `Vertica`.
-```
+
+```shell
 python -m sql_csv \
 vmerge \
 -d "vertica://user@localhost:5433/test_db"
