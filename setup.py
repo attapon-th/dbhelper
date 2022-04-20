@@ -2,16 +2,15 @@
 import collections
 from setuptools import setup, find_packages
 
-
 ReqOpts = collections.namedtuple(
     'ReqOpts', ['skip_requirements_regex', 'default_vcs'])
 
 opts = ReqOpts(None, 'git')
-
+version_info = (0, 4, 0)
 # version should use the format 'x.x.x' (instead of 'vx.x.x')
 setup(
     name='dbhelper',
-    version='0.3.6',
+    version=".".join(map(str, version_info)),
     description='',
     long_description="",
     long_description_content_type='text/markdown',

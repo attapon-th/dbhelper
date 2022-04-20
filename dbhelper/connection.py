@@ -2,8 +2,6 @@ import mysql.connector
 import vertica_python
 import dsnparse
 from sqlalchemy.engine import create_engine
-import os
-
 
 def create_connection(dsn: str, password: str = None):
     """Create Database Connection  

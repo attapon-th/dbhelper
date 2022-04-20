@@ -3,7 +3,6 @@ import os
 import shutil
 import time
 import typing as tp
-from errno import EMFILE
 from typing import Callable
 
 import pandas as pd

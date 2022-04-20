@@ -1,12 +1,10 @@
 import pandas as pd
 from . import dataframe as dh
 import os
-import sys
 from typing import List, Dict, Callable, Iterator
 import time
 import gzip
 import shutil
-import csv
 import zipfile
 import io
 
@@ -65,8 +63,7 @@ def to_csv(engine, sql_query: str, file_name: os.PathLike, compression=CSV_COMPR
             df = dh.convert_dtypes(df)
             func_print("Pandas to CSV file.")
             is_header = i == 0
-            df.to_csv(fa, header=is_header, index=False, mode='a',
-                      quoting=csv.QUOTE_NONNUMERIC, chunksize=1000)
+            df.to_csv(fa, header=is_header, index=False, mode='a', chunksize=1000)
             total_count += len(df.index)
 
         if fa:

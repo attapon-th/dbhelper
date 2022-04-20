@@ -1,10 +1,8 @@
 from random import random
-from typing import Callable, List
+from typing import List
 import pandas as pd
-from vertica_python.vertica.cursor import Cursor
-from vertica_python import errors, Connection as VerticaConnection
+from vertica_python import Connection as VerticaConnection
 from typing import List, Dict, AnyStr, Any, Union
-from . import dataframe as dfh
 import os
 import io
 import random
