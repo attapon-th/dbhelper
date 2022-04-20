@@ -1,6 +1,8 @@
+# DB Helper API Documentation
+
 # Table of Contents
 
-* [\_\_init\_\_](#__init__)
+* [Index](https://attapon-th.github.io/dbhelper/)
 * [connection](#connection)
   * [create\_connection](#connection.create_connection)
 * [dataframe](#dataframe)
@@ -21,10 +23,6 @@
   * [read\_csv](#csv.read_csv)
   * [head\_csv](#csv.head_csv)
   * [batch\_csv](#csv.batch_csv)
-
-<a id="__init__"></a>
-
-# \_\_init\_\_
 
 <a id="connection"></a>
 
