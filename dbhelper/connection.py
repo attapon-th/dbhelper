@@ -1,9 +1,13 @@
-import mysql.connector
-import vertica_python
+from __future__ import annotations
 import dsnparse
-from sqlalchemy.engine import create_engine
+from sqlalchemy.engine import create_engine, Engine
+try:
+    from urllib import unquote, quote
+except ImportError:
+    from urllib.parse import unquote, quote
 
-def create_connection(dsn: str, password: str = None):
+
+def create_connection(dsn: str, password: str = None) -> Engine:
     """Create Database Connection  
 
        MySQL: `mysql://{user}@{host}:{port}/{db_name}`  
@@ -17,40 +21,43 @@ def create_connection(dsn: str, password: str = None):
         password (str, optional): Password Database. Defaults to None.
 
     Returns:
-        DBConnection: Connection Database if success.
+        Engine: Engine SQLAlchemy Connection Database
     """
     o = dsnparse.parse(dsn)
     # print(o)
     scheme = o.scheme.lower()
     if password != None or password != "":
-        o.password = password
+        o.password = quote(password)
 
     if "mysql" == scheme:
-        # print(o.password)
-        cfg = dict(user=o.username,
-                   password=o.password,
-                   host=o.hostname,
-                   database=o.path.lstrip("/"),
-                   port="3306",
-                   )
-        if type(o.port) == int:
-            try:
-                cfg["port"] = str(o.port)
-            except:
-                pass
-        # print(cfg)
-        # os._exit(0)
-        cnx = mysql.connector.connect(**cfg)
+        o.scheme = 'mysql+mysqlconnector'
+        if len(o.query) == 0:
+            o.query_str = 'auth_plugin=mysql_native_password'
+        elif not 'auth_plugin' in o.query:
+            o.query_str += '&auth_plugin=mysql_native_password'
+        cnx = create_engine(
+            o.geturl(),
+            connect_args={'auth_plugin': 'mysql_native_password'})
         return cnx
     elif "vertica" == scheme:
-        return __conn_vertica(dsn, password=password)
+        o.scheme = 'vertica+vertica_python'
+        return create_engine(o.geturl())
     else:
         return create_engine(o.geturl())
 
 
-def __conn_vertica(dsn: str, password: str):
-    print("Connect DSN: ", dsn)
-    conn_info = vertica_python.parse_dsn(dsn)
-    if password:
-        conn_info['password'] = password
-    return vertica_python.connect(**conn_info)
+def test_connection_engine(conn: Engine) -> tuple[bool, str]:
+    """Test Connection Database
+
+    Args:
+        conn (Engine): SQLAlchemy Engine
+
+    Returns:
+        bool: Connection Database if success.
+    """
+    try:
+        with conn.connect() as connection:
+            pass
+            return True, ""
+    except Exception as ex:
+        return False, str(ex)

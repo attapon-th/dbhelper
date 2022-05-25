@@ -41,7 +41,6 @@ To install `dbhelper` from source, run the following command from the root direc
 python setup.py install
 ```
 
-
 Usage:
 
 ### Create Connection

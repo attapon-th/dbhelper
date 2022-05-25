@@ -6,7 +6,7 @@ ReqOpts = collections.namedtuple(
     'ReqOpts', ['skip_requirements_regex', 'default_vcs'])
 
 opts = ReqOpts(None, 'git')
-version_info = (0, 4, 0)
+version_info = (0, 5, 0)
 # version should use the format 'x.x.x' (instead of 'vx.x.x')
 setup(
     name='dbhelper',
@@ -28,5 +28,6 @@ setup(
         'SQLAlchemy>=1.4.28',
         'pyarrow>=7.0.0',
         'mysql-connector-python>=8.0.27',
+        'sqlalchemy-vertica-python>=0.5.10',
         'wheel',
     ])

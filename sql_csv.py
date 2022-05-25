@@ -34,17 +34,23 @@ def dump(output, dsn, sql="", password=None, compression="gzip"):
 
 def dump_from_sql(output: str, dsn: str, sql: str = "", password: str = None, compression: str = "gzip"):
     conn = cc.create_connection(dsn, password)
-
+    ok, err_msg = cc.test_connection_engine(conn)
+    if ok:
+        print("Database: %s connected." % conn.name.upper())
+    else:
+        print("Database: %s not connected." % conn.name.upper())
+        print(err_msg)
     if os.path.exists(sql):
         with open(sql, "r") as f:
             sql_str = f.read()
     else:
         sql_str = sql
     sql_str = sql_str.strip().rstrip(";")
-    sql_count = f"SELECT count(1) c FROM ({sql_str}) q"
-    df = pd.read_sql_query(sql_count, conn)
-    if not df is None:
-        print("SQL Count data from SQL: ", df["c"][0])
+    if conn.name == "vertica":
+        sql_count = f"SELECT count(1) c FROM ({sql_str}) q"
+        df = pd.read_sql_query(sql_count, conn)
+        if not df is None:
+            print("SQL Count data from SQL: ", df["c"][0])
     total = cv.to_csv(conn, sql_str, output, compression, func_print=print)
     print("total count: ", total)
 
