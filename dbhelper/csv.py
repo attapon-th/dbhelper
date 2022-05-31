@@ -127,9 +127,10 @@ def batch_csv(filename: os.PathLike, batch_size: int = 10000,  **pandas_option) 
     """
     pandas_option = __default_pandas_option(**pandas_option)
 
-    df = pd.read_csv(filename, chunksize=batch_size, **pandas_option)
-    df = dh.convert_dtypes(df)
-    return df
+    dfs = pd.read_csv(filename, chunksize=batch_size, **pandas_option)
+    for df in dfs:
+        df = dh.convert_dtypes(df)
+        yield df
 
 
 def __default_pandas_option(**pandas_option):
