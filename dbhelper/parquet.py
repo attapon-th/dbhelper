@@ -80,7 +80,7 @@ def to_parquet(engine, sql_query: str, file_name: os.PathLike, compression=PARQU
         if pqwriter:
             pqwriter.close()
 
-        engine.close()
+        # engine.close()
 
         func_print("Move file.")
         # ยายไฟล์จาก temfile

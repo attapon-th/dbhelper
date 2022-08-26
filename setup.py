@@ -6,7 +6,7 @@ ReqOpts = collections.namedtuple(
     'ReqOpts', ['skip_requirements_regex', 'default_vcs'])
 
 opts = ReqOpts(None, 'git')
-version_info = (0, 5, 1)
+version_info = (0, 5, 2)
 # version should use the format 'x.x.x' (instead of 'vx.x.x')
 setup(
     name='dbhelper',
