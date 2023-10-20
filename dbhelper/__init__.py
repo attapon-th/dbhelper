@@ -1,8 +1,11 @@
-from . import connection
-from . import dataframe
-from . import parquet
-from . import vertica
-from . import csv
+__version__ = '0.6.0'
+
+from dbhelper import connection
+from dbhelper import dataframe
+from dbhelper import parquet
+from dbhelper import vertica
+from dbhelper import csv
+from dbhelper.sqlprocess import process_sql, process_utils
 
 
-__all__ = ['connection', 'dataframe', 'parquet', 'vertica', 'csv']
+__all__ = ['connection', 'dataframe', 'parquet', 'vertica', 'csv', "process_sql", "process_utils"]

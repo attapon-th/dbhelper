@@ -1,33 +1,45 @@
 #!/usr/bin/env python
-import collections
+import os
+from dbhelper import __version__
 from setuptools import setup, find_packages
 
-ReqOpts = collections.namedtuple(
-    'ReqOpts', ['skip_requirements_regex', 'default_vcs'])
 
-opts = ReqOpts(None, 'git')
-version_info = (0, 5, 2)
-# version should use the format 'x.x.x' (instead of 'vx.x.x')
+with open("README.MD", "r", encoding="utf-8", errors="ignore") as fh:
+    long_description = fh.read()
+
+
+def list_files(directory):
+    paths = []
+    for path, directories, filenames in os.walk(directory):
+        for filename in filenames:
+            paths.append(os.path.join(path, filename))
+    return paths
+
+
 setup(
-    name='dbhelper',
-    version=".".join(map(str, version_info)),
-    description='',
-    long_description="",
-    long_description_content_type='text/markdown',
-    author='Attapon Thanawong',
-    author_email='attapon.srem@gmail.com',
-    url='https://github.com/attapon/DbHelper',
-    keywords="database vertica mysql parquet csv",
+    name="dbhelper",
+    version=__version__,
+    author="attapon.th",
+    maintainer="attapon.th",
+    maintainer_email="attapon.4work@gmial.com",
+    url='https://github.com/attapon-th/dbhelper',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
+    install_requires=open("requirements.txt").readlines().append("wheel"),
     packages=find_packages(),
-    py_modules=["sql_parquet", "sql_csv"],
-    install_requires=[
-        'dsnparse>=0.1.15',
-        'pandas>=1.3.4',
-        'vertica-python>=1.0.1',
-        'click==8.0.3',
-        'SQLAlchemy>=1.4.28',
-        'pyarrow>=7.0.0',
-        'mysql-connector-python>=8.0.27',
-        'sqlalchemy-vertica-python>=0.5.10',
-        'wheel',
-    ])
+    python_requires=">=3.8",
+    classifiers=[
+        "Operating System :: OS Independent",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+    ],
+    entry_points={
+        "console_scripts": ["vprocess=vprocess:main"],
+    },
+    py_modules=["vprocess", "sql_parquet", "sql_csv"],
+    # package_data={"sqlprocess": list_files("sqlprocess") + ["requirements.txt", "vprocess.py"]},
+    # include_package_data=True,
+)
