@@ -3,6 +3,17 @@
 [![GitHub version](https://badge.fury.io/gh/attapon-th%2Fdbhelper.svg)](https://badge.fury.io/gh/attapon-th%2Fdbhelper)
 [![GitHub release version](https://img.shields.io/github/v/release/attapon-th/dbhelper?include_prereleases)](https://github.com/attapon-th/dbhelper)
 
+- [Database Helper (Dump, Backup, Restore)](#database-helper-dump-backup-restore)
+  - [API Documentation](#api-documentation)
+  - [TODO:](#todo)
+  - [Installation](#installation)
+    - [Create Connection](#create-connection)
+    - [Dump Parquet file by SQL Query](#dump-parquet-file-by-sql-query)
+  - [Usage Cli](#usage-cli)
+    - [Example `sql_parquet`](#example-sql_parquet)
+    - [Example `sql_csv`](#example-sql_csv)
+  - [Command: `vprocess process`](#command-vprocess-process)
+    - [How to Use Process SQL file:](#how-to-use-process-sql-file)
 
 
 ## API Documentation
@@ -150,29 +161,30 @@ vmerge \
 ```
 
 
-## Command: `vprocess` 
+## Command: `vprocess process` 
 ```bash
-vprocess --help
+vprocess process --help
 ```
 output:
 ```raw
-Usage: vprocess [OPTIONS] COMMAND [ARGS]...
+Usage: vprocess process [OPTIONS] FILE
+
+  Process sql file
 
 Options:
-  --log-level TEXT  the level is one of the predefined levels (CRITICAL,
-                    ERROR, WARNING, INFO, DEBUG)  [default: INFO]
-  --help            Show this message and exit.
-
-Commands:
-  password  quote password string
-  process   Process sql file
+  -c, --config TEXT  config file  [default: config.ini]
+  --dsn TEXT         SQLAlchemy connection string (example:
+                     veritca+vertica_python://user:pass@host:port/dbname)
+  --help             Show this message and exit.
 ```
 
 ### How to Use Process SQL file:
 
 ```bash
-vprocess \
-process \
--c 
--f "test.sql"
+vprocess process -c "config.ini" "test.sql"
+```
+example `config.ini`:
+```ini
+[vertica]
+dsn = "vertica+vertica_python://user:pass@host:port/dbname"
 ```
