@@ -7,3 +7,4 @@ s3fs>=2023.9.2
 fsspec>=2023.9.2
 pyarrow>=13.0.0
 click>=8.1.0
+wheel

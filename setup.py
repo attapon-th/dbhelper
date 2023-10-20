@@ -15,7 +15,7 @@ def list_files(directory):
     return paths
 
 
-__version__ = "0.6.1"
+__version__ = "0.6.2"
 setup(
     name="dbhelper",
     version=__version__,
@@ -25,7 +25,7 @@ setup(
     url='https://github.com/attapon-th/dbhelper',
     long_description=long_description,
     long_description_content_type="text/markdown",
-    install_requires=open("requirements.txt").readlines().append("wheel"),
+    install_requires=[x.strip() for x in open("requirements.txt").readlines()],
     packages=find_packages(),
     python_requires=">=3.8",
     classifiers=[
