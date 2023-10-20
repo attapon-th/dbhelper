@@ -148,3 +148,31 @@ vmerge \
 -m "primary_key1, primary_key2"
 -t "schema_name.table_name"
 ```
+
+
+## Command: `vprocess` 
+```bash
+vprocess --help
+```
+output:
+```raw
+Usage: vprocess [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --log-level TEXT  the level is one of the predefined levels (CRITICAL,
+                    ERROR, WARNING, INFO, DEBUG)  [default: INFO]
+  --help            Show this message and exit.
+
+Commands:
+  password  quote password string
+  process   Process sql file
+```
+
+### How to Use Process SQL file:
+
+```bash
+vprocess \
+process \
+-c 
+-f "test.sql"
+```

@@ -1,7 +1,8 @@
 #!/usr/bin/env python
 import click
-from dbhelper.sqlprocess import process_sql, process_utils as ut
+from dbhelper.sqlprocess import process_sql as pss, process_utils as ut
 import logging
+from configparser import ConfigParser
 
 
 @click.group()
@@ -18,9 +19,13 @@ def cli(log_level: str):
 @click.command(help="Process sql file")
 @click.argument('file', required=True)
 @click.option('-c', '--config', default="config.ini", show_default=True, help="config file")
-def process(file: str, config: str):
+@click.option('--dsn', help="SQLAlchemy connection string (example: veritca+vertica_python://user:pass@host:port/dbname)")
+def process(file: str, config: str, dsn: str = None):
     try:
-        process_sql.process(file, config)
+        if dsn is None:
+            conf: ConfigParser = ut.read_config(config)
+            dsn = conf.get('vertica', 'dsn')
+        pss.process(file, dsn)
     except Exception as ex:
         click.echo("Error: %s" % str(ex), err=True)
 
