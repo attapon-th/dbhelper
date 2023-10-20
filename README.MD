@@ -31,7 +31,6 @@
 To install `dbhelper` with pip:
 
 ```shell
-# Latest commit on main branch
 pip install git+https://github.com/attapon-th/dbhelper.git@main
 ```
 

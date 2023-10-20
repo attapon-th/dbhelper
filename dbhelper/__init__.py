@@ -1,5 +1,3 @@
-__version__ = '0.6.0'
-
 from dbhelper import connection
 from dbhelper import dataframe
 from dbhelper import parquet

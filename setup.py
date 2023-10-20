@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import os
-from dbhelper import __version__
 from setuptools import setup, find_packages
 
 
@@ -16,6 +15,7 @@ def list_files(directory):
     return paths
 
 
+__version__ = "0.6.1"
 setup(
     name="dbhelper",
     version=__version__,
