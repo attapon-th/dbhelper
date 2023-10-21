@@ -19,15 +19,12 @@ support_vars = [
 ]
 
 
-def process(file: str, config: str) -> bool:
+def process(file: str, dsn: str) -> bool:
     if not file.endswith(".sql") and os.path.exists(file):
         log.error(f"error file: {file}.")
         return False
-    log.debug(f"read config file: {config}")
-    conf: ConfigParser = ut.read_config(config)
-    print(conf.sections())
     log.debug("connect vertica")
-    engine: Engine = ut.connection_vertica(dsn=conf.get('vertica', 'dsn'))
+    engine: Engine = ut.connection_vertica(dsn=dsn)
     with engine.raw_connection().cursor() as cur:
         log.info(f"Start process: {file}")
         data = get_sql(file)
