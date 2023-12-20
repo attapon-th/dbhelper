@@ -9,18 +9,23 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from . import dataframe as dfh
 
 # {NONE, SNAPPY, GZIP, BROTLI, LZ4, }.
-PARQUET_COMPRESSION_NONE = 'NONE'
-PARQUET_COMPRESSION_SNAPPY = 'SNAPPY'
-PARQUET_COMPRESSION_GZIP = 'GZIP'
-PARQUET_COMPRESSION_BROTLI = 'BROTLI'
-PARQUET_COMPRESSION_LZ4 = 'LZ4'
-PARQUET_COMPRESSION_ZSTD = 'ZSTD'
+PARQUET_COMPRESSION_NONE = "NONE"
+PARQUET_COMPRESSION_SNAPPY = "SNAPPY"
+PARQUET_COMPRESSION_GZIP = "GZIP"
+PARQUET_COMPRESSION_BROTLI = "BROTLI"
+PARQUET_COMPRESSION_LZ4 = "LZ4"
+PARQUET_COMPRESSION_ZSTD = "ZSTD"
 
 
-def to_parquet(engine, sql_query: str, file_name: os.PathLike, compression=PARQUET_COMPRESSION_SNAPPY, func_print: Callable = print) -> int:
+def to_parquet(
+    engine,
+    sql_query: str,
+    file_name: os.PathLike,
+    compression=PARQUET_COMPRESSION_SNAPPY,
+    func_print: Callable = print,
+) -> int:
     """SQL Query Statemet to Parquet format file.
 
     Args:
@@ -34,11 +39,13 @@ def to_parquet(engine, sql_query: str, file_name: os.PathLike, compression=PARQU
         ex: Errror Handler
 
     Returns:
-        int: Total count record data. 
+        int: Total count record data.
     """
     if func_print is None:
+
         def func_print(*v, **k):
             pass
+
     try:
         dir_temp = "./temp_" + str(time.time()).replace(".", "")
         temp_file = os.path.join(dir_temp, str(time.time()))
@@ -55,7 +62,7 @@ def to_parquet(engine, sql_query: str, file_name: os.PathLike, compression=PARQU
 
         total_count = 0
         for i, df in enumerate(iterator):
-            func_print("Convert To Parquet chunk: ", (i+1))
+            func_print("Convert To Parquet chunk: ", (i + 1))
             if df is not None:
                 func_print("Rows Count: ", len(df.index))
 
@@ -69,7 +76,8 @@ def to_parquet(engine, sql_query: str, file_name: os.PathLike, compression=PARQU
                 # print(df.dtypes)
                 # create a parquet write object giving it an output file
                 pqwriter = pq.ParquetWriter(
-                    temp_file, table.schema, compression=compression)
+                    temp_file, table.schema, compression=compression
+                )
                 pqwriter.write_table(table)
             # subsequent chunks can be written to the same file
             else:
@@ -122,7 +130,9 @@ def head_parquet(filename: os.PathLike, batch_size: int = 10) -> pd.DataFrame:
     return df
 
 
-def batch_parquet(filename: os.PathLike, batch_size: int = 10000) -> tp.Iterator[pd.DataFrame]:
+def batch_parquet(
+    filename: os.PathLike, batch_size: int = 10000
+) -> tp.Iterator[pd.DataFrame]:
     """Read Parquet file into iteration pandas dataframe object
 
     Args:
