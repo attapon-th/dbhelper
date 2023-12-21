@@ -9,7 +9,7 @@ import pyarrow as pa
 def to_csv(
     engine,
     sql_query: str,
-    file_output: os.PathLike,
+    file_output: str,
     chunksize: int = 10000,
     echo: bool = False,
 ) -> int:
@@ -19,7 +19,7 @@ def to_csv(
     Args:
         engine (Any): The database engine to execute the SQL query.
         sql_query (str): The SQL query to execute.
-        file_output (os.PathLike): The file path to save the CSV file to.
+        file_output (str): The file path to save the CSV file to.
         chunksize (int, optional): The number of rows to process at a time. Defaults to 10000.
         echo (bool, optional): Whether to display print statements. Defaults to False.
 
@@ -82,7 +82,7 @@ def to_csv(
 
 
 def read_csv(
-    filename: os.PathLike,
+    filename: str,
     delimiter: str = ",",
     dtype: Union[dict, pd.ArrowDtype, None] = pd.ArrowDtype(pa.string()),
     engine: Literal["c", "python", "pyarrow", "python-fwf"] = "pyarrow",
@@ -96,7 +96,7 @@ def read_csv(
     Reads a CSV file and returns its contents as a pandas DataFrame or an iterator of DataFrames.
 
     Parameters:
-        filename (os.PathLike): The path to the CSV file.
+        filename (str): The path to the CSV file.
         delimiter (str, optional): The delimiter used in the CSV file. Defaults to ",".
         dtype (Union[dict, pd.ArrowDtype, None], optional): The data type of the columns in the DataFrame. Defaults to pd.ArrowDtype(pa.string()).
         engine (Literal["c", "python", "pyarrow", "python-fwf"], optional): The engine used to read the CSV file. Defaults to "pyarrow".
