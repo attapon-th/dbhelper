@@ -1,190 +1,165 @@
-# Database Helper (Dump, Backup, Restore)
+# Database Helper
+
+### `Version: 0.7.x`
 
 [![GitHub version](https://badge.fury.io/gh/attapon-th%2Fdbhelper.svg)](https://badge.fury.io/gh/attapon-th%2Fdbhelper)
 [![GitHub release version](https://img.shields.io/github/v/release/attapon-th/dbhelper?include_prereleases)](https://github.com/attapon-th/dbhelper)
 
-- [Database Helper (Dump, Backup, Restore)](#database-helper-dump-backup-restore)
-  - [API Documentation](#api-documentation)
-  - [TODO:](#todo)
-  - [Installation](#installation)
-    - [Create Connection](#create-connection)
-    - [Dump Parquet file by SQL Query](#dump-parquet-file-by-sql-query)
-  - [Usage Cli](#usage-cli)
-    - [Example `sql_parquet`](#example-sql_parquet)
-    - [Example `sql_csv`](#example-sql_csv)
-  - [Command: `vprocess process`](#command-vprocess-process)
-    - [How to Use Process SQL file:](#how-to-use-process-sql-file)
 
-
-## API Documentation
-
-* [dbhelper](https://attapon-th.github.io/dbhelper/)
-  * [connection](https://attapon-th.github.io/dbhelper/connection)
-  * [csv](https://attapon-th.github.io/dbhelper/csv)
-  * [parquet](https://attapon-th.github.io/dbhelper/parquet)
-  * [vertica](https://attapon-th.github.io/dbhelper/vertica)
-  * [dataframe](https://attapon-th.github.io/dbhelper/dataframe)
+- [Database Helper](#database-helper)
+    - [`Version: 0.7.x`](#version-07x)
+  - [Getting Started](#getting-started)
+    - [Use:](#use)
+    - [Install SQLAlchemy API](#install-sqlalchemy-api)
+  - [Process SQL file](#process-sql-file)
+    - [Usage](#usage)
+    - [Help command](#help-command)
+  - [Dump SQL Query to CSV file](#dump-sql-query-to-csv-file)
+    - [Usage](#usage-1)
+    - [Help command](#help-command-1)
+  - [Dump SQL Query to Parquet file](#dump-sql-query-to-parquet-file)
+    - [Help command](#help-command-2)
 
 
 
-## TODO:  
+## Getting Started
 
-- [x] - Connection Database (Vertica, MySQL or SQLAlchemy Engine connect)
-- [x] - Dump SQL Query to **Parquet**.
-- [x] - Dump SQL QUery to **CSV**  ** Only GZip or plain text
-- [x] - Restore to **Vertica** from **Parquet**
-- [x] - Restore to **Vertica** from **CSV**
-- [ ] - ETC...
-
-
-## Installation
-
-To install `dbhelper` with pip:
-
-```shell
-pip install git+https://github.com/attapon-th/dbhelper.git@main
-```
-
-To install `dbhelper` from source, run the following command from the root directory:
-
-```
-python setup.py install
-```
-
-Usage:
-
-### Create Connection
-```python
-from dbhelper import connection as dh_conn
-
-
-# DSN - MySQL
-dsn = f'mysql://{user}@{host}:{port}/{db_name}'
-
-# DSN - Vertica
-dsn = f'vertica://{user}@{host}:{port}/{db_name}'
-
-# DSN - The Engine is the starting point for any SQLAlchemy application
-# https://docs.sqlalchemy.org/en/14/core/engines.html#engine-configuration
-dsn = f'{dialect}+{driver}://{user}@{host}:{port}/{db_name}'
-
-conn = dh_conn.create_connection(dsn, password)
-
-```
-
-### Dump Parquet file by SQL Query
-
-```python
-from dbhelper import parquet as pq
-
-sql = "SELET * FROM some_table Where id > 100;"
-output = "./some_table_id100.parquet"
-total_count = pq.create_parquet_file(conn, sql, output, compression='SNAPPY', func_print=print)
-print("record dump total: ", total_count)
-```
-
-
-## Usage Cli
-
-- `sql_parquet`  
-- `sql_csv`
-
-```shell
-python -m sql_parquet --help
-
-#--- OUTPUT ---#
-Usage: python -m sql_parquet [OPTIONS] COMMAND [ARGS]...
-
-  Dump SQL Statement to Parquet file.
-
-Options:
-  --help  Show this message and exit.
-
-Commands:
-  dump
-  vmerge
-```
-
-### Example `sql_parquet`
-
-Dump `SQL Query` to `Parquet` file.
-
-```shell
-python -m sql_parquet \
-dump \
--s "SELET * FROM some_table Where id > 100;"
--d "mysql://user@localhost:3306/test_db"
--p "password" 
--o "test.parquet"
-```
-
-
-Restore `Parquet` file to `Vertica`.
-
-```shell
-python -m sql_parquet \
-vmerge \
--d "vertica://user@localhost:3306/test_db"
--p "password" 
--f "test.parquet"
--m "primary_key1, primary_key2"
--t "schema_name.table_name"
-```
-
-### Example `sql_csv`
-
-
-Dump `SQL Query` to `csv` file.
-
-> Default compression: `gzip`
-
-```shell
-python -m sql_csv \
-dump \
--s "SELET * FROM some_table Where id > 100;"
--d "mysql://user@localhost:3306/test_db"
--p "password" 
--o "test.csv.gz"
-```
-
-
-Restore `CSV` file to `Vertica`.
-
-```shell
-python -m sql_csv \
-vmerge \
--d "vertica://user@localhost:5433/test_db"
--p "password" 
--f "test.csv.gz"
--m "primary_key1, primary_key2"
--t "schema_name.table_name"
-```
-
-
-## Command: `vprocess process` 
 ```bash
-vprocess process --help
+pip install git+https://github.com/attapon-th/dbhelper@main
 ```
-output:
-```raw
-Usage: vprocess process [OPTIONS] FILE
+
+### Use:
+
+```base
+dbper --help
+```
+
+### Install SQLAlchemy API
+
+```bash
+# mysql
+# dsn=mysql+pymysql://user:pass@host:port/dbname
+pip install pymysql
+
+# postgres
+# dsn=postgresql+psycopg2://user:pass@host:port/dbname
+pip install psycopg2-binary
+
+# vertica
+# dsn=vertica+vertica_python://user:pass@host:port/dbname
+pip install sqlalchemy-vertica-python
+# or 
+pip install git+https://github.com/attapon-th/sqlalchemy-vertica-python.git
+
+# other sqlalchemy support
+```
+> other sqlalchemy support
+> [https://docs.sqlalchemy.org/en/20/core/engines.html](https://docs.sqlalchemy.org/en/20/core/engines.html)
+
+## Process SQL file
+
+### Usage 
+
+```bash
+DSN=vertica+vertica_python://user:pass@host:port/dbname
+dbper process --dsn $DSN  test.sql 
+```
+
+example `test.sql`****
+```sql
+-- test.sql
+-- create table
+CREATE TABLE IF NOT EXISTS test (
+  id int,
+  name text
+);
+
+-- insert data
+INSERT INTO test (id, name) VALUES
+  (1, 'a'),
+  (2, 'b'),
+  (3, 'c');
+
+-- select data
+SELECT * FROM test;
+```
+
+### Help command
+```bash
+dbper process --help
+```
+```
+Usage: dbper process [OPTIONS] FILE
 
   Process sql file
 
 Options:
-  -c, --config TEXT  config file  [default: config.ini]
-  --dsn TEXT         SQLAlchemy connection string (example:
-                     veritca+vertica_python://user:pass@host:port/dbname)
-  --help             Show this message and exit.
+  -d, --dsn TEXT  SQLAlchemy connection string  [required]
+  --help          Show this message and exit.
 ```
 
-### How to Use Process SQL file:
+---
+
+
+## Dump SQL Query to CSV file
+
+### Usage
+```bash
+DSN=vertica+vertica_python://user:pass@host:port/dbname
+
+dbper csv \
+  --dsn $DSN \
+  --sql "SELECT * FROM test" \
+  test.csv # output file name
+```
+
+### Help command
 
 ```bash
-vprocess process -c "config.ini" "test.sql"
+dbper csv --help
 ```
-example `config.ini`:
-```ini
-[vertica]
-dsn = "vertica+vertica_python://user:pass@host:port/dbname"
+```
+Usage: dbper csv [OPTIONS] OUTPUT
+
+  Dump SQL Statement to CSV file
+
+  OUTPUT: `./test.csv.gz` is compressed with GZIP
+
+  OR
+
+  OUTPUT: `./test.csv` is not compressed
+
+Options:
+  -d, --dsn TEXT  Database connection string  [required]
+  -s, --sql TEXT  SQL Query Statement[file|str]  [required]
+  --help          Show this message and exit.
+```
+---
+
+## Dump SQL Query to Parquet file
+
+```bash
+DSN=vertica+vertica_python://user:pass@host:port/dbname
+dbper parquet \
+  --dsn $DSN \
+  --sql "SELECT * FROM test" \
+  test.parquet # output file name
+```
+
+### Help command
+
+```bash
+dbper parquet --help
+```
+```
+Usage: dbper parquet [OPTIONS] OUTPUT
+
+  Dump SQL Statement to Parquet file
+
+Options:
+  -d, --dsn TEXT                  Database connection string  [required]
+  -s, --sql TEXT                  SQL Query Statement[file|str]  [required]
+  -c, --compression [snappy|gzip|brotli]
+                                  Compression type
+  --help                          Show this message and exit.
 ```

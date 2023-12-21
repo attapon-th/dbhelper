@@ -1,10 +1,5 @@
-dsnparse>=0.2.1
-mysql-connector-python>=8.0.27
-pandas>=2.0.3
+pandas>=2.1.0
 SQLAlchemy>=2.0.19
-sqlalchemy-vertica-python @ git+https://github.com/attapon-th/sqlalchemy-vertica-python.git@6bca2fd18fd4a456736f2a05af68a0d26e2f7dd7
 s3fs>=2023.9.2
-fsspec>=2023.9.2
-pyarrow>=13.0.0
+pyarrow>=14.0.0
 click>=8.1.0
-wheel
