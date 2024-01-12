@@ -1,7 +1,8 @@
-from dbhelper.connection import create_connection
-from dbhelper.parquet import to_parquet, read_parquet
-from dbhelper.csv import read_csv, to_csv
-from dbhelper.process_sql import file_sql, process_sql
+from .connection import create_connection
+from .parquet import to_parquet, read_parquet
+from .csv import read_csv, to_csv
+from .process_sql import file_sql, process_sql
+from . import cmd
 
 
 __all__ = [
@@ -12,4 +13,5 @@ __all__ = [
     "read_csv",
     "process_sql",
     "file_sql",
+    "cmd",
 ]

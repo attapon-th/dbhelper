@@ -10,15 +10,12 @@
     - [`Version: 0.7.x`](#version-07x)
   - [Getting Started](#getting-started)
     - [Use:](#use)
-    - [Install SQLAlchemy API](#install-sqlalchemy-api)
+    - [Install SQLAlchemy Database API](#install-sqlalchemy-database-api)
   - [Process SQL file](#process-sql-file)
     - [Usage](#usage)
-    - [Help command](#help-command)
   - [Dump SQL Query to CSV file](#dump-sql-query-to-csv-file)
     - [Usage](#usage-1)
-    - [Help command](#help-command-1)
   - [Dump SQL Query to Parquet file](#dump-sql-query-to-parquet-file)
-    - [Help command](#help-command-2)
 
 
 
@@ -34,7 +31,7 @@ pip install git+https://github.com/attapon-th/dbhelper@main
 dbper --help
 ```
 
-### Install SQLAlchemy API
+### Install SQLAlchemy Database API
 
 ```bash
 # mysql
@@ -61,8 +58,12 @@ pip install git+https://github.com/attapon-th/sqlalchemy-vertica-python.git
 ### Usage 
 
 ```bash
-DSN=vertica+vertica_python://user:pass@host:port/dbname
-dbper process --dsn $DSN  test.sql 
+export DB_DSN=vertica+vertica_python://user:pass@host:port/dbname
+dbper process test.sql 
+
+# or 
+
+dbper process --dsn "vertica+vertica_python://user:pass@host:port/dbname" test.sql
 ```
 
 example `test.sql`****
@@ -84,19 +85,6 @@ INSERT INTO test (id, name) VALUES
 SELECT * FROM test;
 ```
 
-### Help command
-```bash
-dbper process --help
-```
-```
-Usage: dbper process [OPTIONS] FILE
-
-  Process sql file
-
-Options:
-  -d, --dsn TEXT  SQLAlchemy connection string  [required]
-  --help          Show this message and exit.
-```
 
 ---
 
@@ -105,61 +93,32 @@ Options:
 
 ### Usage
 ```bash
-DSN=vertica+vertica_python://user:pass@host:port/dbname
+export DB_DSN=vertica+vertica_python://user:pass@host:port/dbname
 
 dbper csv \
-  --dsn $DSN \
-  --sql "SELECT * FROM test" \
-  test.csv # output file name
+  --output test.csv
+  "SELECT * FROM test"
+
+# or
+dbper csv \
+  --dsn "vertica+vertica_python://user:pass@host:port/dbname" \
+  --output test.csv
+  "SELECT * FROM test"
+
 ```
-
-### Help command
-
-```bash
-dbper csv --help
-```
-```
-Usage: dbper csv [OPTIONS] OUTPUT
-
-  Dump SQL Statement to CSV file
-
-  OUTPUT: `./test.csv.gz` is compressed with GZIP
-
-  OR
-
-  OUTPUT: `./test.csv` is not compressed
-
-Options:
-  -d, --dsn TEXT  Database connection string  [required]
-  -s, --sql TEXT  SQL Query Statement[file|str]  [required]
-  --help          Show this message and exit.
-```
----
 
 ## Dump SQL Query to Parquet file
 
 ```bash
-DSN=vertica+vertica_python://user:pass@host:port/dbname
+export DB_DSN=vertica+vertica_python://user:pass@host:port/dbname
 dbper parquet \
-  --dsn $DSN \
-  --sql "SELECT * FROM test" \
-  test.parquet # output file name
-```
+  --output test.parquet \
+  "SELECT * FROM test" 
 
-### Help command
 
-```bash
-dbper parquet --help
-```
-```
-Usage: dbper parquet [OPTIONS] OUTPUT
-
-  Dump SQL Statement to Parquet file
-
-Options:
-  -d, --dsn TEXT                  Database connection string  [required]
-  -s, --sql TEXT                  SQL Query Statement[file|str]  [required]
-  -c, --compression [snappy|gzip|brotli]
-                                  Compression type
-  --help                          Show this message and exit.
+# or
+dbper parquet \
+  --dsn "vertica+vertica_python://user:pass@host:port/dbname" \
+  --output test.parquet \
+  "SELECT * FROM test" 
 ```

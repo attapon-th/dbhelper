@@ -15,7 +15,7 @@ def list_files(directory):
     return paths
 
 
-__version__ = "0.7.0"
+__version__ = "0.7.1"
 setup(
     name="dbhelper",
     version=__version__,
