@@ -28,12 +28,14 @@ Without compression:
 """
 )
 @click.argument("sql", required=True, type=str, nargs=1)
-@click.option("-d", "--dsn", required=True, default="DB_DSN", help="SQLAlchemy connection string (default: environment variable name: DB_DSN )")
-@click.option("--output", "-o", type=click.Path(), help="Output file name (default: stdout)")
-def csv(sql: str, output: str | None = "stdout", dsn: str = "DB_DSN"):
-    dsn = get_dsn(dsn)
+@click.option("-o", "--output", default="stdout", type=click.Path(), help="Output file name (default: stdout)")
+@click.option("-c", "--config", default="config.ini", help="Config file (default: config.ini)")
+@click.option("-k", "--keys", default="vertica.dsn", help="Config Keys (default: vertica.dsn)")
+@click.option("-d", "--dsn", default="DB_DSN", help="SQLAlchemy connection string or OS Environment (default: DB_DSN )")
+def csv(sql: str, config, keys, output, dsn):
+    dsn = get_dsn(dsn, config, keys)
     engine = create_connection(dsn)
-    if output is None:
+    if output.lower() == "stdout":
         df: DataFrame = pd.read_sql_query(
             sql,
             engine,

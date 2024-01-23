@@ -13,9 +13,10 @@ log: logging.Logger = logging.getLogger()
 
 
 def file_sql(file: str) -> List[Dict[str, List[str]]]:
-    if not file.endswith(".sql") and os.path.exists(file):
-        log.error(f"error file: {file}")
-        return []
+    if not os.path.exists(file):
+        # log.error(f"error file: {file}")
+        return [{"name": ["SQL Query"], "sql": [file]}]
+
     lines: List[str] = open(file, "r", encoding="utf-8").readlines()
     if len(lines) == 0:
         log.error(f"error empty file: {file}")
