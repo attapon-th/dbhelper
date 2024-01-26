@@ -4,7 +4,7 @@ from .dbuitl import DBUtil
 
 
 class VerticaMerge(DBUtil):
-    def __init__(self, engine: Engine, source_schema: str, source_table: str) -> None:
+    def __init__(self, engine: Engine, source_schema: str, source_table: str, target_schema: str, target_table: str) -> None:
         """
         Initializes the DataMover object with the provided engine, source schema, and source table.
 
@@ -12,6 +12,8 @@ class VerticaMerge(DBUtil):
             engine (Engine): The database engine to use.
             source_schema (str): The source schema to use for data extraction.
             source_table (str): The source table to use for data extraction.
+            target_schema (str): The target schema to use for data insertion.
+            target_table (str): The target table to use for data insertion.
 
         Returns:
             None
@@ -22,8 +24,8 @@ class VerticaMerge(DBUtil):
         self._source_schema: str = source_schema
         self._source_table: str = source_table
 
-        self._target_schema: str | None = None
-        self._target_table: str | None = None
+        self._target_schema: str = target_schema
+        self._target_table: str = target_table
 
         self._on_columns: list[str] = []
         self._insert_columns: list[str] = []
@@ -145,7 +147,8 @@ class VerticaMerge(DBUtil):
 
         # source table alias name s
         sql += f"USING {self._source_schema}.{self._source_table} s ON \n"
-        sql += f"({self._on_columns}) \n"
+        merge_on = " AND ".join([f"t.{a} = s.{a}" for a in self._on_columns])
+        sql += f"{merge_on} \n"
 
         # UPDATE
         update_set: str = ", ".join([f"{a} = s.{a}" for a in self._update_columns])
