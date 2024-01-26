@@ -119,3 +119,18 @@ class DBUtil:
 
         columns: list[ReflectedColumn] = self.conn.dialect.get_columns(self.conn, table, schema=self.schema)
         return [c["name"] for c in columns if "primary_key" in c and c["primary_key"] is True]
+
+    def sql_create_table_like(self, like_table: str, to_table: str, include_columns: list[str] | None = None) -> str:
+        sql = f"CREATE TABLE IF NOT EXISTS {self.schema}.{to_table} ( \n"
+        sql_cols = []
+
+        for col in self.get_columns(like_table):
+            if include_columns is not None and col["name"] not in include_columns:
+                continue
+            not_null = ""
+            if col["nullable"] is False:
+                not_null = " NOT NULL"
+            sql_cols.append(f"{col['name']} {col['type']} {not_null}")
+        sql += ",\n".join(sql_cols)
+        sql += ");"
+        return sql

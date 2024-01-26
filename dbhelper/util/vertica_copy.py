@@ -6,7 +6,7 @@ from .dbuitl import DBUtil
 class VerticaCopy(DBUtil):
     def __init__(self, engine: Engine, schema: str, table: str) -> None:
         super().__init__(engine, schema)
-        self._table = table
+        self.table = table
         self._from_input = "STDIN"
         self._compression: Literal["BZIP", "GZIP", ""] = ""
         self._columns: list[str] = []
@@ -65,12 +65,12 @@ class VerticaCopy(DBUtil):
         """
         self.check_connect()
         schema: str = self.schema
-        table: str = self._table
+        table: str = self.table
         colStr = ""
         if len(self._columns) > 0:
             colStr = f"({', '.join(self._columns)})"
         sql: str = f"COPY {schema}.{table}{colStr} FROM {self._from_input} {self._compression} PARSER fcsvparser() \n"
-        sql += f"REJECTED DATA AS TABLE {schema}.REJECT_{table}"
+        sql += f"REJECTED DATA AS TABLE {schema}.__REJECT_{table}"
         sql += ";"
         return sql
 
@@ -86,7 +86,7 @@ class VerticaCopy(DBUtil):
             bool | None: True if the COPY operation was successful, False otherwise.
         """
         self.check_connect()
-        table: str = self._table
+        table: str = self.table
         conn = self.engine.raw_connection().driver_connection
         if conn is None:
             return False
