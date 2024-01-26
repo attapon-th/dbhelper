@@ -26,6 +26,7 @@ class VerticaMerge(DBUtil):
 
         self._target_schema: str = target_schema
         self._target_table: str = target_table
+        self.target(target_schema, target_table)
 
         self._on_columns: list[str] = []
         self._insert_columns: list[str] = []
