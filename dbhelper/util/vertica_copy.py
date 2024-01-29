@@ -10,6 +10,8 @@ class VerticaCopy(DBUtil):
         self._from_input = "STDIN"
         self._compression: Literal["BZIP", "GZIP", ""] = ""
         self._columns: list[str] = []
+        self._reject_table: str = f"{schema}.__REJECT_{table}"
+        self._reject_node: str = ""
 
     def input(self, filepath_or_stdin: str = "STDIN"):
         """
@@ -53,12 +55,17 @@ class VerticaCopy(DBUtil):
         self._columns = columns
         return self
 
+    def set_reject_data(self, table: str, schema: str | None = None, nodename: str | None = None):
+        self._reject_table = "%s.%s" % (schema, table)
+        if nodename is not None:
+            self._reject_node = nodename
+
     def get_sql(self) -> str:
         """
         Returns the SQL for the COPY operation.
 
         Args:
-            reject_table (str | None, optional): The name of the rejected table. Defaults to None is {schema}.REJECT_{table}.
+            reject_table (str | None, optional): The name of the rejected table. Defaults to None is {schema}.__REJECT_{table}.
 
         Returns:
             str: The SQL for the COPY operation.
@@ -70,7 +77,10 @@ class VerticaCopy(DBUtil):
         if len(self._columns) > 0:
             colStr = f"({', '.join(self._columns)})"
         sql: str = f"COPY {schema}.{table}{colStr} FROM {self._from_input} {self._compression} PARSER fcsvparser() \n"
-        sql += f"REJECTED DATA AS TABLE {schema}.__REJECT_{table}"
+        sql += "REJECTED DATA "
+        if self._reject_node != "":
+            sql += f"NO {self._reject_node} "
+        sql += f"AS TABLE {schema}.__REJECT_{table}"
         sql += ";"
         return sql
 
