@@ -43,8 +43,8 @@ def csv(sql: str, config, keys, output, dsn):
             dtype_backend="pyarrow",
             dtype=pd.ArrowDtype(pa.string()),
         )
-        click.echo(df.head(100).to_csv(output))
-        click.echo(f"total count: {df.shape[0]:,}")
+        click.echo(df.head(100).to_csv(index=False))
+        # click.echo(f"total count: {df.shape[0]:,}")
         return
     total = to_csv(engine, sql, output, echo=True)
     click.echo(f"output file: {output}")

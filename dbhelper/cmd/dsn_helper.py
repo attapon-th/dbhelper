@@ -5,7 +5,7 @@ from sqlalchemy.engine import make_url, URL
 
 
 def get_dsn(dsn, config_file, keys) -> str:
-    if config_file is None:
+    if config_file is not None:
         conf = get_config(config_file)
         dsn = config_keys(conf, keys)
 
