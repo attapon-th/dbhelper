@@ -35,6 +35,12 @@ class DBUtil:
         self.check_connect()
         return self.conn.execute(sa.text(sql), parameters)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
     def close(self):
         """
         Closes the connection and disposes of the engine.

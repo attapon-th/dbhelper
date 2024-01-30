@@ -182,3 +182,17 @@ class VerticaMerge(DBUtil):
         sql: str = self.get_sql(more_insert, more_update)
         cur = self._targetdb.execute(sql)
         return cur.fetchone()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def close(self):
+        """
+        Closes the connection and disposes of the engine.
+        """
+        self._targetdb.close()
+        super().close()
+        self.engine.dispose()

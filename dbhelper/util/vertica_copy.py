@@ -84,7 +84,7 @@ class VerticaCopy(DBUtil):
         sql += ";"
         return sql
 
-    def copy(self, csv) -> bool:
+    def copy(self, csv, custom_copy_sql: str | None = None) -> bool:
         """
         Executes the COPY operation.
 
@@ -106,8 +106,11 @@ class VerticaCopy(DBUtil):
 
             # columns is src_columns intersect tgt_column
             columns: list[str] = [a for a in src_columns if a in tgt_column]
-
-            sql: str = self.columns(columns).get_sql()
+            sql: str = ""
+            if custom_copy_sql is None:
+                sql: str = self.columns(columns).get_sql()
+            else:
+                sql: str = custom_copy_sql
 
             if not hasattr(conn, "cursor"):
                 print("cursor not support")
@@ -124,3 +127,16 @@ class VerticaCopy(DBUtil):
             print(err)
 
         return False
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.close()
+
+    def close(self):
+        """
+        Closes the connection and disposes of the engine.
+        """
+        super().close()
+        self.engine.dispose()
