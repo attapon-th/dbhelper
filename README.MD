@@ -22,7 +22,7 @@
 ## Getting Started
 
 ```bash
-pip install git+https://github.com/attapon-th/dbhelper@main
+pip install git+https://github.com/attapon-th/dbhelper@latest
 ```
 
 ### Use:
@@ -44,9 +44,7 @@ pip install psycopg2-binary
 
 # vertica
 # dsn=vertica+vertica_python://user:pass@host:port/dbname
-pip install sqlalchemy-vertica-python
-# or 
-pip install git+https://github.com/attapon-th/sqlalchemy-vertica-python.git
+pip install git+https://github.com/attapon-th/sqlalchemy-vertica-python.git@latest
 
 # other sqlalchemy support
 ```
