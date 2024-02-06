@@ -14,12 +14,13 @@ log: logging.Logger = logging.getLogger()
 
 def file_sql(file: str) -> List[Dict[str, List[str]]]:
     if not os.path.exists(file):
-        # log.error(f"error file: {file}")
-        return [{"name": ["SQL Query"], "sql": [file]}]
+        file = file.replace("\r\n", "\n")
+        lines = file.split("\n")
+    else:
+        lines: List[str] = open(file, "r", encoding="utf-8").readlines()
 
-    lines: List[str] = open(file, "r", encoding="utf-8").readlines()
     if len(lines) == 0:
-        log.error(f"error empty file: {file}")
+        log.error("error not found sql.")
         return []
 
     lines = [l.rstrip("\n") for l in lines if l.strip() != ""]
