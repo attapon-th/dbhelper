@@ -59,7 +59,7 @@ def process_sql(file: str, dsn: str) -> bool:
     if len(sqls) == 0:
         return False
 
-    log.info(f"Start process: {file}")
+    log.info("Start processing...")
     try:
         for sql in sqls:
             dt = datetime.now()
